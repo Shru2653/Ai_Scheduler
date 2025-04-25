@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}AI Task Scheduler{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{% static 'taskmanager/css/style.css' %}">
+</head>
+<body class="bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-white transition-all">
+
+    <!-- Navbar -->
+    <nav class="flex justify-between items-center px-6 py-4 bg-white dark:bg-gray-800 shadow-md">
+        <div class="text-2xl font-bold">AI Scheduler</div>
+        <div class="space-x-4">
+            <a href="{% url 'dashboard' %}" class="hover:underline">Dashboard</a>
+            <a href="{% url 'create_task' %}" class="hover:underline">Create Task</a>
+            <a href="{% url 'system_monitor' %}" class="hover:underline">System Monitor</a>
+            <a href="{% url 'executing_task_info' %}">Executing Tasks</a>
+            <a href="{% url 'schedule_tasks' %}" class="hover:underline">Schedule Tasks</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="p-6 animate-fade-in">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Chatbot Modal Button-->
+     <!-- Chatbot Modal Button -->
+<button id="open-chatbot-btn" style="
+position: fixed; bottom: 40px; right: 40px; z-index: 1000;
+background: #4f8cff; color: #fff; border: none; border-radius: 24px;
+padding: 14px 20px; font-size: 18px; cursor: pointer; box-shadow: 0 2px 12px rgba(0,0,0,0.14);
+">Chat with AI</button>
+
+<!-- Chatbot Modal Structure -->
+<div id="chatbot-modal" style="
+display: none; position: fixed; bottom: 0; right: 0; width: 410px; height: 650px;
+background: #fff; border-radius: 18px 18px 0 0; box-shadow: 0 4px 32px rgba(0,0,0,0.17);
+z-index: 1100; flex-direction: column; overflow: hidden; border: 1px solid #ddd;"
+>
+<div style="background:#4f8cff; color:#fff; padding:14px 18px; font-size:18px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;">
+    Chatbot
+    <button id="close-chatbot-btn" style="
+        background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; margin-left: 10px;
+    ">&times;</button>
+</div>
+<iframe id="chatbot-iframe" src="/chatbot/" style="border:none; width:100%; height:100%;"></iframe>
+</div>
+
+<!--JS for chatbot model behaviour-->
+<script>
+    document.getElementById('open-chatbot-btn').onclick = function() {
+        document.getElementById('chatbot-modal').style.display = 'flex';
+    };
+    document.getElementById('close-chatbot-btn').onclick = function() {
+        document.getElementById('chatbot-modal').style.display = 'none';
+    };
+    // Optional: close modal when you click outside it
+    window.addEventListener('mousedown', function(e) {
+        var modal = document.getElementById('chatbot-modal');
+        if (modal.style.display === 'flex' && !modal.contains(e.target) && e.target.id !== 'open-chatbot-btn') {
+            modal.style.display = 'none';
+        }
+    });
+    </script>
+
+    <!-- Footer -->
+    <footer class="text-center p-4 text-sm text-gray-500 dark:text-gray-400">
+        &copy; 2025 AI Scheduler. All rights reserved.
+    </footer>
+
+    <script src="{% static 'taskmanager/js/scripts.js' %}"></script>
+</body>
+</html>

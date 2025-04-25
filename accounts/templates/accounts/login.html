@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #181824 0%, #212132 100%);
+            color: #e0e6ed;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-container {
+            background: #23243a;
+            padding: 2.5rem 2rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 40px 0 rgba(8,12,40,0.45);
+            max-width: 400px;
+            width: 100%;
+            border: 1px solid #2a2e45;
+        }
+
+        h2 {
+            text-align: center;
+            color: #53f2dc;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        form label {
+            display: block;
+            margin-bottom: 6px;
+            color: #90a7c9;
+            font-weight: 500;
+            margin-top: 1rem;
+        }
+
+        form input {
+            width: 100%;
+            padding: 0.6rem;
+            margin-top: 0.2rem;
+            margin-bottom: 1.2rem;
+            border: 1.5px solid #353958;
+            border-radius: 6px;
+            background: #1d1e2c;
+            color: #e0e6ed;
+            font-size: 1rem;
+            transition: border 0.2s, box-shadow 0.2s;
+            box-shadow: none;
+        }
+
+        form input:focus {
+            border-color: #53f2dc;
+            outline: none;
+            box-shadow: 0 0 0 2px #53f2dc33;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            background: linear-gradient(90deg, #53f2dc 0%, #4158d0 100%);
+            border: none;
+            color: #23243a;
+            padding: 0.8rem;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            margin-top: 0.5rem;
+            box-shadow: 0 2px 8px 0 rgba(81,242,220,0.09);
+        }
+
+        button[type="submit"]:hover {
+            background: linear-gradient(90deg, #4158d0 0%, #53f2dc 100%);
+            color: #f5f9fa;
+        }
+
+        a {
+            color: #53f2dc;
+            text-decoration: none;
+            transition: color 0.18s;
+        }
+
+        a:hover {
+            color: #4158d0;
+            text-decoration: underline;
+        }
+
+        .messages {
+            margin-bottom: 1rem;
+        }
+
+        .messages div {
+            padding: 0.8em 1em;
+            background: #2b223a;
+            color: #ffb3b3;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            font-size: 0.98em;
+            border-left: 4px solid #ff6b6b;
+            box-shadow: 0 2px 8px 0 rgba(255,107,107,0.06);
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Login</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Login</button>
+        </form>
+        <p>Don't have an account? <a href="{% url 'register' %}">Register here</a></p>
+        <div class="messages">
+            {% for message in messages %}
+                <div>{{ message }}</div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

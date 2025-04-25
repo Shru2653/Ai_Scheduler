@@ -1,0 +1,33 @@
+{% extends "taskmanager/base.html" %}
+{% block content %}
+<h2>Currently Executing Tasks</h2>
+<table>
+    <thead>
+        <tr>
+            <th>PID</th>
+            <th>Process Name</th>
+            <th>Arrival Time</th>
+            <th>Waiting Time (s)</th>
+            <th>TAT (s)</th>
+            <th>Memory Used (MB)</th>
+            <th>CPU Usage (%)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for proc in processes %}
+        <tr>
+            <td>{{ proc.pid }}</td>
+            <td>{{ proc.name }}</td>
+            <td>{{ proc.arrival_time }}</td>
+            <td>{{ proc.waiting_time }}</td>
+            <td>{{ proc.tat }}</td>
+            <td>{{ proc.memory_used }}</td>
+            <td>{{ proc.cpu_usage }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h3>Average Waiting Time: {{ avg_wt }} sec</h3>
+<h3>Average Turnaround Time: {{ avg_tat }} sec</h3>
+{% endblock %}

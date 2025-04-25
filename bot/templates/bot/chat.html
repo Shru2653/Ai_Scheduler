@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chatbot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        :root {
+            --primary: #4f8cff;
+            --background: #181b20;
+            --input-bg: #23262b;
+            --bot-bubble: #23293b;
+            --user-bubble: #4f8cff;
+            --bot-text: #e6e6e6;
+            --user-text: #fff;
+            --border: #2c2f36;
+            --shadow: rgba(0,0,0,0.36);
+            --mic-bg: #23262b;
+            --mic-active: #ff5252;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: var(--background);
+            color: #e6e6e6;
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+        }
+        #chat-root {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+            max-width: 410px;
+            max-height: 650px;
+            margin: 0 auto;
+            background: var(--background);
+            border-radius: 18px 18px 0 0;
+            box-shadow: 0 4px 32px var(--shadow);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        #chat-header {
+            background: var(--primary);
+            color: #fff;
+            padding: 18px 22px 16px 22px;
+            font-size: 20px;
+            font-weight: 600;
+            text-align: left;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+        #chat-window {
+            flex: 1;
+            overflow-y: auto;
+            padding: 28px 20px 16px 20px;
+            background: var(--background);
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) var(--background);
+        }
+        #chat-window::-webkit-scrollbar {
+            width: 8px;
+        }
+        #chat-window::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 8px;
+        }
+        #chat-window::-webkit-scrollbar-track {
+            background: var(--background);
+        }
+        .message-row {
+            display: flex;
+            margin-bottom: 16px;
+        }
+        .message-row.user {
+            justify-content: flex-end;
+        }
+        .bubble {
+            max-width: 80%;
+            padding: 13px 18px;
+            border-radius: 20px;
+            font-size: 16px;
+            line-height: 1.6;
+            box-shadow: 0 2px 8px var(--shadow);
+            word-break: break-word;
+            transition: background 0.15s;
+        }
+        .bubble.bot {
+            background: var(--bot-bubble);
+            color: var(--bot-text);
+            border-bottom-left-radius: 8px;
+            align-self: flex-start;
+        }
+        .bubble.user {
+            background: var(--user-bubble);
+            color: var(--user-text);
+            border-bottom-right-radius: 8px;
+            align-self: flex-end;
+        }
+        #chat-input-row {
+            display: flex;
+            align-items: center;
+            padding: 18px 16px 18px 16px;
+            background: var(--input-bg);
+            border-top: 1px solid var(--border);
+        }
+        #chat-input {
+            flex: 1;
+            background: var(--input-bg);
+            border: none;
+            color: #e6e6e6;
+            font-size: 17px;
+            padding: 13px 10px;
+            border-radius: 16px;
+            outline: none;
+            margin-right: 10px;
+            transition: box-shadow 0.15s;
+            box-shadow: 0 1px 5px var(--shadow) inset;
+        }
+        #chat-input:focus {
+            box-shadow: 0 2px 10px var(--primary) inset;
+        }
+        #send-btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 12px 21px;
+            font-size: 18px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-weight: 500;
+            box-shadow: 0 1px 8px var(--shadow);
+            transition: background 0.13s;
+            margin-left: 4px;
+        }
+        #send-btn:hover, #send-btn:focus {
+            background: #2361c5;
+        }
+        #mic-btn {
+            background: var(--mic-bg);
+            color: #e6e6e6;
+            border: none;
+            padding: 12px 13px 12px 13px;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-right: 4px;
+            font-size: 20px;
+            transition: background 0.13s, color 0.13s;
+            box-shadow: 0 1px 7px var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #mic-btn.listening {
+            background: var(--mic-active);
+            color: #fff;
+            animation: pulse 1.2s infinite;
+        }
+        #mic-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 var(--mic-active);}
+            70% { box-shadow: 0 0 0 9px rgba(255,82,82, 0.07);}
+            100% { box-shadow: 0 0 0 0 var(--mic-active);}
+        }
+        @media (max-width: 430px) {
+            #chat-root { max-width: 100vw; }
+        }
+        .mic-tooltip {
+            position: absolute;
+            bottom: 50px;
+            left: 20px;
+            background: #22272e;
+            color: #fff;
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s;
+            z-index: 100;
+        }
+        #mic-btn:hover + .mic-tooltip,
+        #mic-btn:focus + .mic-tooltip {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-root">
+        <div id="chat-header">🤖 AI Chatbot</div>
+        <div id="chat-window"></div>
+        <div id="chat-input-row" style="position:relative">
+            <button id="mic-btn" title="Speak" aria-label="Voice command">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <ellipse cx="12" cy="11" rx="5" ry="7" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <rect x="9" y="17" width="6" height="3" rx="1.5" fill="currentColor"/>
+                </svg>
+            </button>
+            <span class="mic-tooltip" id="mic-tooltip" style="left:54px;"></span>
+            <input id="chat-input" type="text" placeholder="Type a message or use voice..." autocomplete="off" />
+            <button id="send-btn" title="Send">➤</button>
+        </div>
+    </div>
+    <script>
+        const chatWindow = document.getElementById('chat-window');
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+        const micBtn = document.getElementById('mic-btn');
+        const micTooltip = document.getElementById('mic-tooltip');
+
+        sendBtn.onclick = sendMessage;
+        chatInput.addEventListener("keydown", function(e) {
+            if (e.key === "Enter") sendMessage();
+        });
+
+        // Voice command feature
+        let recognition;
+        let listening = false;
+        function setupSpeech() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                micBtn.disabled = true;
+                micTooltip.textContent = "Voice not supported in this browser";
+                return;
+            }
+            micTooltip.textContent = "Speak your message";
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = "en-US";
+            recognition.onstart = () => {
+                listening = true;
+                micBtn.classList.add("listening");
+                micTooltip.textContent = "Listening...";
+            };
+            recognition.onend = () => {
+                listening = false;
+                micBtn.classList.remove("listening");
+                micTooltip.textContent = "Speak your message";
+            };
+            recognition.onerror = (e) => {
+                listening = false;
+                micBtn.classList.remove("listening");
+                micTooltip.textContent = "Could not understand. Try again!";
+            };
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                chatInput.value = transcript;
+                chatInput.focus();
+            };
+            micBtn.onclick = function() {
+                if (listening) {
+                    recognition.stop();
+                } else {
+                    recognition.start();
+                }
+            };
+        }
+
+        setupSpeech();
+
+        function appendMessage(sender, text) {
+            const row = document.createElement('div');
+            row.className = 'message-row ' + (sender === "You" ? "user" : "bot");
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble ' + (sender === "You" ? "user" : "bot");
+            bubble.textContent = text;
+            row.appendChild(bubble);
+            chatWindow.appendChild(row);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        function sendMessage() {
+            const msg = chatInput.value.trim();
+            if (!msg) return;
+            appendMessage("You", msg);
+            chatInput.value = "";
+            fetch('/chatbot/chat/?msg=' + encodeURIComponent(msg))
+                .then(response => response.json())
+                .then(data => {
+                    appendMessage("Bot", data.reply);
+                })
+                .catch(() => {
+                    appendMessage("Bot", "⚠️ Sorry, there was an error.");
+                });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+{% extends 'taskmanager/base.html' %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h2>My Tasks</h2>
+
+    {% if tasks %}
+        <table class="task-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                <tr>
+                    <td>{{ task.title }}</td>
+                    <td>{{ task.category }}</td>
+                    <td>
+                        {% if task.priority == 1 %}
+                            High
+                        {% elif task.priority == 2 %}
+                            Medium
+                        {% else %}
+                            Low
+                        {% endif %}
+                    </td>
+                    <td>{{ task.status }}</td>
+                    <td>{{ task.start_time }}</td>
+                    <td>{{ task.end_time }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No tasks available yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

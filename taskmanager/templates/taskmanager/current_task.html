@@ -1,0 +1,32 @@
+{% extends 'taskmanager/base.html' %}
+{% block content %}
+<div class="container">
+    <h2>Currently Executing Task</h2>
+    {% if current_task %}
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ current_task.title }}</td>
+                    <td>{{ current_task.category }}</td>
+                    <td>{{ current_task.priority }}</td>
+                    <td>{{ current_task.status }}</td>
+                    <td>{{ current_task.start_time }}</td>
+                    <td>{{ current_task.end_time }}</td>
+                </tr>
+            </tbody>
+        </table>
+    {% else %}
+        <p>No task is currently executing.</p>
+    {% endif %}
+</div>
+{% endblock %}
