@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'taskmanager',
     'bot',
     'accounts',
+    'scheduler'
 ]
 
 MIDDLEWARE = [

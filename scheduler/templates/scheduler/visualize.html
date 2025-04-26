@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Schedule Visualization</title>
+    <style>
+        .gantt-container {
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .timeline {
+            position: relative;
+            height: 30px;
+            background: #f0f0f0;
+            margin: 5px 0;
+        }
+        .process-block {
+            position: absolute;
+            height: 100%;
+            background: #4CAF50;
+            border: 1px solid #388E3C;
+            color: white;
+            text-align: center;
+            line-height: 30px;
+            font-size: 12px;
+        }
+        .process-block-start {
+            left: 0;
+        }
+        .metrics-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .metrics-table th, .metrics-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .metrics-table th {
+            background-color: #f5f5f5;
+        }
+        .metrics-summary {
+            margin: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        .back-button {
+            display: inline-block;
+            margin: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .back-button:hover {
+            background-color: #388E3C;
+        }
+    </style>
+</head>
+<body>
+    <h2 style="margin: 20px;">Scheduling Result</h2>
+
+    <div class="gantt-container">
+        <h3>Gantt Chart</h3>
+        <div class="timeline">
+            {% for process_name, completion_time in result %}
+                {% if not forloop.first %}
+                    {% with prev_time=result|get_item:forloop.counter0|get_item:1 %}
+                        <div class="process-block" data-left="{{ prev_time }}" data-width="{{ completion_time|subtract:prev_time }}">
+                            {{ process_name }}
+                        </div>
+                    {% endwith %}
+                {% else %}
+                    <div class="process-block process-block-start" data-width="{{ completion_time }}">
+                        {{ process_name }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="metrics-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Process</th>
+                    <th>Arrival Time</th>
+                    <th>Burst Time</th>
+                    <th>Priority</th>
+                    <th>Completion Time</th>
+                    <th>Turnaround Time</th>
+                    <th>Waiting Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for process in processes %}
+                <tr>
+                    <td>{{ process.process_name }}</td>
+                    <td>{{ process.arrival_time }}</td>
+                    <td>{{ process.burst_time }}</td>
+                    <td>{{ process.priority }}</td>
+                    <td>{{ process.completion_time }}</td>
+                    <td>{{ process.turnaround_time }}</td>
+                    <td>{{ process.waiting_time }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="metrics-summary">
+        <h3>Performance Metrics</h3>
+        <p>Average Turnaround Time: {{ avg_turnaround_time|floatformat:2 }}</p>
+        <p>Average Waiting Time: {{ avg_waiting_time|floatformat:2 }}</p>
+        <p>CPU Utilization: {{ cpu_utilization|floatformat:2 }}%</p>
+    </div>
+
+    <a href="{% url 'input_processes' %}" class="back-button">Add More Processes</a>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const processBlocks = document.querySelectorAll('.process-block');
+            processBlocks.forEach(block => {
+                const left = block.dataset.left;
+                const width = block.dataset.width;
+                if (left) {
+                    block.style.left = `calc(${left}% - 1px)`;
+                }
+                block.style.width = `calc(${width}% + 1px)`;
+            });
+        });
+    </script>
+</body>
+</html>

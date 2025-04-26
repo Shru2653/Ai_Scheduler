@@ -2,43 +2,295 @@
 
 {% block content %}
 <div class="dashboard-container">
-    <h2>My Tasks</h2>
+    <div class="dashboard-header">
+        <h2>OS Process Scheduler</h2>
+        <div class="header-actions">
+            <a href="{% url 'system_monitor' %}" class="action-button">
+                <i class="fas fa-chart-line"></i> System Monitor
+            </a>
+        </div>
+    </div>
 
-    {% if tasks %}
-        <table class="task-table">
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <h3>CPU Utilization</h3>
+            <div class="metric-value">{{ cpu_usage }}%</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="cpu-progress-fill"></div>
+            </div>
+        </div>
+        <div class="metric-card">
+            <h3>Memory Usage</h3>
+            <div class="metric-value">{{ memory_usage }}%</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="memory-progress-fill"></div>
+            </div>
+        </div>
+        <div class="metric-card">
+            <h3>Context Switches</h3>
+            <div class="metric-value">{{ context_switches }}</div>
+        </div>
+        <div class="metric-card">
+            <h3>Throughput</h3>
+            <div class="metric-value">{{ throughput }} processes/sec</div>
+        </div>
+    </div>
+
+    <div class="process-table-container">
+        <h3>Process Queue</h3>
+        <table class="process-table">
             <thead>
                 <tr>
-                    <th>Title</th>
-                    <th>Category</th>
+                    <th>PID</th>
+                    <th>Process Name</th>
+                    <th>State</th>
                     <th>Priority</th>
-                    <th>Status</th>
-                    <th>Start Time</th>
-                    <th>End Time</th>
+                    <th>CPU Burst</th>
+                    <th>Memory</th>
+                    <th>I/O Operations</th>
+                    <th>Waiting Time</th>
                 </tr>
             </thead>
             <tbody>
-                {% for task in tasks %}
+                {% for process in processes %}
                 <tr>
-                    <td>{{ task.title }}</td>
-                    <td>{{ task.category }}</td>
+                    <td>{{ process.pid }}</td>
+                    <td>{{ process.name }}</td>
                     <td>
-                        {% if task.priority == 1 %}
-                            High
-                        {% elif task.priority == 2 %}
-                            Medium
-                        {% else %}
-                            Low
-                        {% endif %}
+                        <span class="state-badge state-{{ process.state|lower }}">
+                            {{ process.state }}
+                        </span>
                     </td>
-                    <td>{{ task.status }}</td>
-                    <td>{{ task.start_time }}</td>
-                    <td>{{ task.end_time }}</td>
+                    <td>{{ process.priority }}</td>
+                    <td>{{ process.cpu_burst }}ms</td>
+                    <td>{{ process.memory }}MB</td>
+                    <td>{{ process.io_operations }}</td>
+                    <td>{{ process.waiting_time }}ms</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-    {% else %}
-        <p>No tasks available yet.</p>
-    {% endif %}
+    </div>
+
+    <div class="resource-allocation">
+        <h3>Resource Allocation</h3>
+        <div class="allocation-grid">
+            <div class="allocation-card">
+                <h4>CPU</h4>
+                <div class="allocation-chart" id="cpu-allocation"></div>
+            </div>
+            <div class="allocation-card">
+                <h4>Memory</h4>
+                <div class="allocation-chart" id="memory-allocation"></div>
+            </div>
+            <div class="allocation-card">
+                <h4>I/O Devices</h4>
+                <div class="allocation-chart" id="io-allocation"></div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+    .dashboard-container {
+        padding: 2rem;
+    }
+
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .action-button {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.8rem 1.5rem;
+        background: linear-gradient(135deg, #6c63ff, #4d4d7c);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .action-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(108, 99, 255, 0.3);
+    }
+
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .metric-card {
+        background: var(--darker-bg);
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .metric-card h3 {
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+
+    .metric-value {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .progress-bar {
+        height: 8px;
+        background: var(--border-color);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary-color), var(--hover-color));
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+
+    .process-table-container {
+        background: var(--darker-bg);
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+
+    .process-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .process-table th,
+    .process-table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .process-table th {
+        background: var(--secondary-color);
+        color: white;
+        font-weight: 600;
+    }
+
+    .state-badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .state-running { background: #4CAF50; }
+    .state-ready { background: #2196F3; }
+    .state-blocked { background: #FFC107; }
+    .state-terminated { background: #9E9E9E; }
+
+    .resource-allocation {
+        background: var(--darker-bg);
+        padding: 1.5rem;
+        border-radius: 8px;
+    }
+
+    .allocation-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .allocation-card {
+        background: var(--secondary-color);
+        padding: 1rem;
+        border-radius: 8px;
+    }
+
+    .allocation-chart {
+        height: 200px;
+        margin-top: 1rem;
+    }
+</style>
+
+<script>
+    // Initialize resource allocation charts and progress bars
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get template variables
+        const templateData = {
+            cpuUsage: parseInt('{{ cpu_usage }}'),
+            memoryUsage: parseInt('{{ memory_usage }}'),
+            ioDisk: parseInt('{{ io_disk }}'),
+            ioNetwork: parseInt('{{ io_network }}'),
+            ioPrinter: parseInt('{{ io_printer }}')
+        };
+
+        // Set progress bar widths
+        document.getElementById('cpu-progress-fill').style.width = `${templateData.cpuUsage}%`;
+        document.getElementById('memory-progress-fill').style.width = `${templateData.memoryUsage}%`;
+
+        // CPU Allocation Chart
+        new Chart(document.getElementById('cpu-allocation'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Used', 'Idle'],
+                datasets: [{
+                    data: [templateData.cpuUsage, 100 - templateData.cpuUsage],
+                    backgroundColor: ['#6c63ff', '#4d4d7c']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        // Memory Allocation Chart
+        new Chart(document.getElementById('memory-allocation'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Used', 'Free'],
+                datasets: [{
+                    data: [templateData.memoryUsage, 100 - templateData.memoryUsage],
+                    backgroundColor: ['#6c63ff', '#4d4d7c']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        // I/O Allocation Chart
+        new Chart(document.getElementById('io-allocation'), {
+            type: 'bar',
+            data: {
+                labels: ['Disk', 'Network', 'Printer'],
+                datasets: [{
+                    label: 'I/O Operations',
+                    data: [templateData.ioDisk, templateData.ioNetwork, templateData.ioPrinter],
+                    backgroundColor: '#6c63ff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    });
+</script>
 {% endblock %}

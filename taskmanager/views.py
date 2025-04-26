@@ -61,8 +61,59 @@ def get_system_stats(request):
 
 @login_required
 def dashboard(request):
-    tasks = Task.objects.filter(user=request.user)
-    return render(request, 'taskmanager/dashboard.html', {'tasks': tasks})
+    # Get system stats
+    cpu_usage = psutil.cpu_percent()
+    memory_usage = psutil.virtual_memory().percent
+    
+    # Get process information
+    processes = []
+    context_switches = 0
+    total_io_operations = {'disk': 0, 'network': 0, 'printer': 0}
+    
+    for proc in psutil.process_iter(['pid', 'name', 'status', 'cpu_percent', 'memory_info', 'io_counters']):
+        try:
+            pinfo = proc.info
+            processes.append({
+                'pid': pinfo['pid'],
+                'name': pinfo['name'],
+                'state': pinfo['status'],
+                'priority': proc.nice(),
+                'cpu_burst': pinfo['cpu_percent'],
+                'memory': round(pinfo['memory_info'].rss / (1024 * 1024), 2),  # Convert to MB
+                'io_operations': {
+                    'disk': pinfo['io_counters'].read_bytes + pinfo['io_counters'].write_bytes if 'io_counters' in pinfo else 0,
+                    'network': pinfo['io_counters'].read_bytes + pinfo['io_counters'].write_bytes if 'io_counters' in pinfo else 0
+                },
+                'waiting_time': 0  # This would need to be calculated based on scheduling
+            })
+            
+            # Count I/O operations
+            if 'io_counters' in pinfo:
+                total_io_operations['disk'] += pinfo['io_counters'].read_bytes + pinfo['io_counters'].write_bytes
+                total_io_operations['network'] += pinfo['io_counters'].read_bytes + pinfo['io_counters'].write_bytes
+            
+            # Count context switches (simplified)
+            if pinfo['status'] == 'running':
+                context_switches += 1
+                
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            continue
+    
+    # Calculate throughput (processes per second)
+    throughput = len(processes) / 60  # Assuming we're measuring over a minute
+    
+    context = {
+        'cpu_usage': cpu_usage,
+        'memory_usage': memory_usage,
+        'context_switches': context_switches,
+        'throughput': round(throughput, 2),
+        'processes': processes,
+        'io_disk': total_io_operations['disk'],
+        'io_network': total_io_operations['network'],
+        'io_printer': 0  # Simulated printer operations
+    }
+    
+    return render(request, 'taskmanager/dashboard.html', context)
 
 def system_monitor(request):
     import platform
@@ -144,34 +195,58 @@ def home(request):
 
 #Schedulers
 
+@login_required
 def schedule_tasks(request):
-    # Example tasks for testing; replace this with dynamic user input or database tasks
-    tasks = [
-        {"name": "Task1", "execution_time": 10, "priority": 2},
-        {"name": "Task2", "execution_time": 5, "priority": 1},
-        {"name": "Task3", "execution_time": 8, "priority": 3},
-    ]
-    
-    schedule = []  # Default empty schedule
     if request.method == "POST":
-        algorithm = request.POST.get("algorithm")  # Get selected algorithm
-        time_slice = int(request.POST.get("time_slice", 3))  # Default time slice = 3
-
+        algorithm = request.POST.get("algorithm")
+        time_quantum = int(request.POST.get("time_quantum", 2))
+        
+        # Get process details from form
+        process_names = request.POST.getlist("process_name[]")
+        arrival_times = request.POST.getlist("arrival_time[]")
+        burst_times = request.POST.getlist("burst_time[]")
+        priorities = request.POST.getlist("priority[]")
+        
+        # Create processes list
+        processes = []
+        for i in range(len(process_names)):
+            processes.append({
+                'process_name': process_names[i],
+                'arrival_time': int(arrival_times[i]),
+                'burst_time': int(burst_times[i]),
+                'priority': int(priorities[i])
+            })
+        
+        # Generate schedule based on selected algorithm
         if algorithm == "round_robin":
-            schedule = round_robin(tasks, time_slice)
+            result = round_robin(processes, time_quantum)
         elif algorithm == "priority":
-            schedule = priority_scheduling(tasks)
+            result = priority_scheduling(processes)
         elif algorithm == "ai":
-            schedule = ai_based_prioritization(tasks)
+            result = ai_based_prioritization(processes)
         else:
-            schedule = [{"task": "Unsupported Algorithm", "execution_time": 0}]
-
-        # Debugging output
-        print("Generated Schedule:", schedule)
-
-        # Return the schedule to the template
-        return render(request, "taskmanager/schedule.html", {"schedule": schedule, "tasks": tasks})
-
-    # Render the page with the default task list
-    return render(request, "taskmanager/schedule.html", {"tasks": tasks})
+            result = []
+        
+        # Calculate performance metrics
+        total_turnaround = sum(p['turnaround_time'] for p in processes)
+        total_waiting = sum(p['waiting_time'] for p in processes)
+        num_processes = len(processes)
+        
+        # Calculate CPU utilization
+        total_burst_time = sum(p['burst_time'] for p in processes)
+        total_time = max(p['completion_time'] for p in processes)
+        cpu_utilization = (total_burst_time / total_time) * 100 if total_time > 0 else 0
+        
+        context = {
+            'schedule': processes,
+            'result': result,
+            'avg_turnaround_time': total_turnaround / num_processes if num_processes > 0 else 0,
+            'avg_waiting_time': total_waiting / num_processes if num_processes > 0 else 0,
+            'cpu_utilization': cpu_utilization
+        }
+        
+        return render(request, "taskmanager/schedule.html", context)
+    
+    # Initial render with empty context
+    return render(request, "taskmanager/schedule.html")
 

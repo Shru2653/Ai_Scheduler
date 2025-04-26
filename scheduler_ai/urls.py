@@ -23,6 +23,7 @@ urlpatterns = [
     path('', include('taskmanager.urls')),
     path('accounts/', include('accounts.urls')),
     path('', main_views.home, name='home'),
+    path('scheduler/', include('scheduler.urls')),
 ]
 
 

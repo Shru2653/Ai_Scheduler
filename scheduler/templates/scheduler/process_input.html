@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Input Processes</title>
+</head>
+<body>
+    <h2>Enter Process Details</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        <label>Number of Processes:</label>
+        <input type="number" name="num_processes" id="num_processes" required>
+        <button type="button" onclick="generateForm()">Generate Form</button>
+        
+        <div id="process_inputs"></div>
+
+        <label>Algorithm:</label>
+        <select name="algorithm" required>
+            <option value="round_robin">Round Robin</option>
+            <option value="priority_scheduling">Priority Scheduling</option>
+            <option value="ai_based_prioritization">AI Based Prioritization</option>
+        </select>
+
+        <br><br>
+        <input type="submit" value="Submit">
+    </form>
+
+    <script>
+        function generateForm() {
+            var num = document.getElementById('num_processes').value;
+            var container = document.getElementById('process_inputs');
+            container.innerHTML = '';
+
+            for (var i = 0; i < num; i++) {
+                container.innerHTML += `
+                    <h3>Process ${i+1}</h3>
+                    Name: <input type="text" name="name_${i}" required><br>
+                    Arrival Time: <input type="number" name="arrival_${i}" required><br>
+                    Burst Time: <input type="number" name="burst_${i}" required><br>
+                    Priority: <input type="number" name="priority_${i}" required><br><br>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

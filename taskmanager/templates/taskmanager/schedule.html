@@ -5,143 +5,343 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Scheduler</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* General Styling */
+        :root {
+            --primary-color: #6c63ff;
+            --secondary-color: #4d4d7c;
+            --dark-bg: #1e1e2f;
+            --darker-bg: #1b1b2f;
+            --border-color: #39395d;
+            --text-color: #f5f5f5;
+            --hover-color: #7b73ff;
+        }
+
         body {
             font-family: 'Poppins', sans-serif;
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #1e1e2f, #2c2c54);
-            color: #f5f5f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background: linear-gradient(135deg, var(--dark-bg), var(--secondary-color));
+            color: var(--text-color);
             min-height: 100vh;
         }
 
         .container {
             width: 90%;
-            max-width: 800px;
-            background: #1b1b2f;
+            max-width: 1200px;
+            margin: 2rem auto;
+            background: var(--darker-bg);
             border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
             overflow: hidden;
         }
 
         header {
             text-align: center;
-            background: #4d4d7c;
+            background: var(--secondary-color);
             color: white;
-            padding: 20px;
-            border-bottom: 5px solid #39395d;
+            padding: 2rem;
+            border-bottom: 5px solid var(--border-color);
         }
 
         header h1 {
             font-size: 2.5em;
             margin: 0;
+            background: linear-gradient(135deg, var(--primary-color), #8a85ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
         }
 
-        header p {
-            font-size: 1.2em;
-            margin: 5px 0 0;
+        .content-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            padding: 2rem;
         }
 
         .task-section {
-            padding: 20px;
+            background: var(--secondary-color);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
         .task-section h2 {
             font-size: 1.8em;
-            color: #6c63ff;
-            margin-bottom: 15px;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
             text-align: center;
         }
 
         label {
             font-size: 1.1em;
             font-weight: 600;
-            color: #ccc;
-        }
-
-        select, input, button {
+            color: var(--text-color);
             display: block;
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0 20px;
-            border-radius: 8px;
-            font-size: 1em;
+            margin-bottom: 0.5rem;
         }
 
         select, input {
-            background: #2c2c54;
-            border: 2px solid #4d4d7c;
-            color: #f5f5f5;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            font-size: 1em;
+            background: var(--dark-bg);
+            border: 2px solid var(--border-color);
+            color: var(--text-color);
+            transition: all 0.3s ease;
         }
 
         select:focus, input:focus {
-            border-color: #6c63ff;
+            border-color: var(--primary-color);
             box-shadow: 0 0 12px rgba(108, 99, 255, 0.5);
             outline: none;
         }
 
         button {
-            background: linear-gradient(135deg, #6c63ff, #4d4d7c);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
             border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
         }
 
         button:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 15px rgba(108, 99, 255, 0.4);
+            background: linear-gradient(135deg, var(--hover-color), var(--secondary-color));
         }
 
-        .schedule-section {
-            padding: 20px;
-            background: #2c2c54;
-            border-top: 1px solid #4d4d7c;
+        .gantt-container {
+            background: var(--secondary-color);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
-        .schedule-section h2 {
-            text-align: center;
-            font-size: 1.8em;
-            color: #6c63ff;
-            margin-bottom: 20px;
-        }
-
-        .schedule-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .schedule-list li {
-            background: #1b1b2f;
-            margin: 10px 0;
-            padding: 15px;
-            border: 1px solid #39395d;
+        .gantt-chart {
+            height: 300px;
+            margin-top: 1rem;
+            position: relative;
+            background: var(--dark-bg);
             border-radius: 8px;
-            color: #f5f5f5;
-            font-size: 1.2em;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            overflow: hidden;
         }
 
-        .schedule-list li span {
-            font-weight: bold;
-            color: #6c63ff;
-        }
-
-        footer {
-            text-align: center;
-            padding: 10px;
-            background: #4d4d7c;
+        .process-block {
+            position: absolute;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-color), var(--hover-color));
+            border-radius: 4px;
             color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .process-block:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .process-block::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 0.5rem;
+            background: var(--dark-bg);
+            color: var(--text-color);
+            border-radius: 4px;
+            font-size: 0.8em;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .process-block:hover::after {
+            opacity: 1;
+        }
+
+        .metrics-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+            background: var(--dark-bg);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .metrics-table th, .metrics-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .metrics-table th {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        .metrics-table tr:hover {
+            background: rgba(108, 99, 255, 0.1);
+        }
+
+        .metrics-summary {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--secondary-color);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .metrics-summary h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .metrics-summary p {
+            margin: 0.5rem 0;
+            font-size: 1.1em;
+        }
+
+        .system-monitor {
+            background: var(--secondary-color);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .monitor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .monitor-item {
+            background: var(--dark-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .monitor-value {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 0.5rem 0;
+        }
+
+        .monitor-label {
             font-size: 0.9em;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--hover-color));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .comparison-chart {
+            background: var(--secondary-color);
+            padding: 2rem;
+            border-radius: 10px;
+            margin-top: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .chart-container {
+            height: 300px;
+            margin-top: 1rem;
+            position: relative;
+            background: var(--dark-bg);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .metric-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            background: var(--dark-bg);
+            border-radius: 4px;
+        }
+
+        .metric-label {
+            width: 150px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .metric-value {
+            flex-grow: 1;
+            text-align: right;
+            margin-right: 1rem;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .metric-bar-fill {
+            height: 20px;
+            background: linear-gradient(90deg, var(--primary-color), var(--hover-color));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .remove-button {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .remove-button:hover {
+            background: #ff6666;
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .content-wrapper {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -149,111 +349,223 @@
     <div class="container">
         <header>
             <h1>Task Scheduler</h1>
-            <p>Organize and prioritize your tasks effectively.</p>
+            <p>Advanced Process Scheduling Visualization</p>
         </header>
 
-        <section class="task-section">
-            <h2>Select Scheduling Algorithm</h2>
-            <form method="POST" action="/schedule_tasks/">
-                {% csrf_token %}
-                <label for="algorithm">Choose an Algorithm:</label>
-                <select name="algorithm" id="algorithm" required>
-                    <option value="round_robin">Round Robin</option>
-                    <option value="priority">Priority Scheduling</option>
-                    <option value="ai">AI-Based Prioritization</option>
-                </select>
+        <div class="system-monitor">
+            <h2>System Resources</h2>
+            <div class="monitor-grid">
+                <div class="monitor-item">
+                    <div class="monitor-label">CPU Usage</div>
+                    <div class="monitor-value" id="cpu-usage">0%</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="cpu-progress"></div>
+                    </div>
+                </div>
+                <div class="monitor-item">
+                    <div class="monitor-label">Memory Usage</div>
+                    <div class="monitor-value" id="memory-usage">0%</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="memory-progress"></div>
+                    </div>
+                </div>
+                <div class="monitor-item">
+                    <div class="monitor-label">Disk Usage</div>
+                    <div class="monitor-value" id="disk-usage">0%</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="disk-progress"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-wrapper">
+            <section class="task-section">
+                <h2>Configure Scheduling</h2>
+                <form method="POST" action="/schedule_tasks/">
+                    {% csrf_token %}
+                    <label for="algorithm">Scheduling Algorithm:</label>
+                    <select name="algorithm" id="algorithm" required>
+                        <option value="round_robin">Round Robin</option>
+                        <option value="priority">Priority Scheduling</option>
+                        <option value="ai">AI-Based Prioritization</option>
+                    </select>
+                    
+                    <label for="time_quantum">Time Quantum (ms):</label>
+                    <input type="number" id="time_quantum" name="time_quantum" value="2" min="1" required>
+                    
+                    <div id="processes-container">
+                        <label>Process Details:</label>
+                        <div class="process-input-group">
+                            <input type="text" name="process_name[]" placeholder="Process Name" required>
+                            <input type="number" name="arrival_time[]" placeholder="Arrival Time" min="0" required>
+                            <input type="number" name="burst_time[]" placeholder="Burst Time" min="1" required>
+                            <input type="number" name="priority[]" placeholder="Priority" min="0" required>
+                        </div>
+                    </div>
+                    
+                    <button type="button" onclick="addProcessInput()">Add Process</button>
+                    <button type="submit">Generate Schedule</button>
+                </form>
+            </section>
+
+            <section class="gantt-container">
+                <h2>Schedule Visualization</h2>
+                <div class="gantt-chart" id="ganttChart" {% if schedule %}data-schedule="{{ schedule|safe }}"{% endif %}></div>
                 
-                <label for="time_slice">Time Slice (units):</label>
-                <input type="number" id="time_slice" name="time_slice" value="3" required>
-                
-                <button type="submit">Schedule</button>
-            </form>
-        </section>
+                {% if schedule %}
+                <table class="metrics-table">
+                    <thead>
+                        <tr>
+                            <th>Process</th>
+                            <th>Arrival</th>
+                            <th>Burst</th>
+                            <th>Priority</th>
+                            <th>Completion</th>
+                            <th>Turnaround</th>
+                            <th>Waiting</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for process in schedule %}
+                        <tr>
+                            <td>{{ process.process_name }}</td>
+                            <td>{{ process.arrival_time }}</td>
+                            <td>{{ process.burst_time }}</td>
+                            <td>{{ process.priority }}</td>
+                            <td>{{ process.completion_time }}</td>
+                            <td>{{ process.turnaround_time }}</td>
+                            <td>{{ process.waiting_time }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
 
-        <section class="schedule-section">
-            <h2>Generated Schedule</h2>
-            {% if schedule %}
-                <ul class="schedule-list">
-                    {% for task in schedule %}
-                        <li>
-                            <span>{{ task.task }}</span> - {{ task.execution_time }} units
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p style="text-align: center;">No schedule generated yet. Select an algorithm and click "Schedule."</p>
-            {% endif %}
-            <h2 style="text-align:center; color:#6c63ff;">Gantt Chart</h2>
-            <canvas id="ganttChart" width="100%" height="300"></canvas>
+                <div class="metrics-summary">
+                    <h3>Performance Metrics</h3>
+                    <p>Average Turnaround Time: {{ avg_turnaround_time|floatformat:2 }} ms</p>
+                    <p>Average Waiting Time: {{ avg_waiting_time|floatformat:2 }} ms</p>
+                    <p>CPU Utilization: {{ cpu_utilization|floatformat:2 }}%</p>
+                </div>
 
-        </section>
-
-        <footer>
-            © 2025 Task Scheduler | All Rights Reserved
-        </footer>
+                <!-- Add Comparison Chart -->
+                <div class="comparison-chart">
+                    <h3>Algorithm Performance Comparison</h3>
+                    <div class="chart-container" id="comparisonChart">
+                        <div class="metric-bar">
+                            <span class="metric-label">Average Turnaround Time</span>
+                            <span class="metric-value" id="turnaround-value">{{ avg_turnaround_time|floatformat:2 }} ms</span>
+                            <div class="metric-bar-fill" id="turnaround-bar"></div>
+                        </div>
+                        <div class="metric-bar">
+                            <span class="metric-label">Average Waiting Time</span>
+                            <span class="metric-value" id="waiting-value">{{ avg_waiting_time|floatformat:2 }} ms</span>
+                            <div class="metric-bar-fill" id="waiting-bar"></div>
+                        </div>
+                        <div class="metric-bar">
+                            <span class="metric-label">CPU Utilization</span>
+                            <span class="metric-value" id="cpu-value">{{ cpu_utilization|floatformat:2 }}%</span>
+                            <div class="metric-bar-fill" id="cpu-bar"></div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </section>
+        </div>
     </div>
 
     <script>
-        const algorithmSelect = document.getElementById('algorithm');
-        const form = algorithmSelect.closest('form');
-        const timeSliceInput = document.getElementById('time_slice');
-    
-        const extraInputsContainer = document.createElement('div');
-        form.insertBefore(extraInputsContainer, form.querySelector('button'));
-    
-        function updateFormFields() {
-            const selected = algorithmSelect.value;
-            extraInputsContainer.innerHTML = ''; // Clear previous
-    
-            if (selected === 'round_robin' || selected === 'priority') {
-                timeSliceInput.parentElement.style.display = 'block';
-    
-                const taskInputSet = `
-                    <label>Enter Tasks:</label>
-                    <div id="tasks-container"></div>
-                    <button type="button" onclick="addTaskInput()">+ Add Task</button>
-                `;
-                extraInputsContainer.innerHTML = taskInputSet;
-    
-                addTaskInput(); // One by default
-    
-            } else if (selected === 'ai') {
-                timeSliceInput.parentElement.style.display = 'none';
-    
-                const taskInputSet = `
-                    <label>Describe Tasks for AI:</label>
-                    <div id="tasks-container"></div>
-                    <button type="button" onclick="addAIInput()">+ Add Description</button>
-                `;
-                extraInputsContainer.innerHTML = taskInputSet;
-    
-                addAIInput(); // One by default
+        // Add system monitoring functionality
+        function updateSystemStats() {
+            fetch('/get_system_stats/')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('cpu-usage').textContent = `${data.cpu}%`;
+                    document.getElementById('memory-usage').textContent = `${data.memory}%`;
+                    document.getElementById('disk-usage').textContent = `${data.disk}%`;
+                    
+                    document.getElementById('cpu-progress').style.width = `${data.cpu}%`;
+                    document.getElementById('memory-progress').style.width = `${data.memory}%`;
+                    document.getElementById('disk-progress').style.width = `${data.disk}%`;
+                });
+        }
+
+        // Update system stats every 2 seconds
+        setInterval(updateSystemStats, 2000);
+        updateSystemStats();
+
+        function addProcessInput() {
+            const container = document.getElementById('processes-container');
+            const processGroup = document.createElement('div');
+            processGroup.className = 'process-input-group';
+            processGroup.innerHTML = `
+                <input type="text" name="process_name[]" placeholder="Process Name" required>
+                <input type="number" name="arrival_time[]" placeholder="Arrival Time" min="0" required>
+                <input type="number" name="burst_time[]" placeholder="Burst Time" min="1" required>
+                <input type="number" name="priority[]" placeholder="Priority" min="0" required>
+                <button type="button" onclick="this.parentElement.remove()" class="remove-button">Remove</button>
+            `;
+            container.appendChild(processGroup);
+        }
+
+        function updateGanttChart(schedule) {
+            const ganttChart = document.getElementById('ganttChart');
+            ganttChart.innerHTML = '';
+            
+            let maxTime = 0;
+            schedule.forEach(process => {
+                maxTime = Math.max(maxTime, process.completion_time);
+            });
+
+            schedule.forEach((process, index) => {
+                const block = document.createElement('div');
+                block.className = 'process-block';
+                block.textContent = process.process_name;
+                
+                const left = (process.arrival_time / maxTime) * 100;
+                const width = ((process.completion_time - process.arrival_time) / maxTime) * 100;
+                
+                block.style.left = `${left}%`;
+                block.style.width = `${width}%`;
+                block.style.top = `${index * 50}px`;
+                
+                block.setAttribute('data-tooltip', 
+                    `Process: ${process.process_name}
+                    Arrival: ${process.arrival_time}
+                    Burst: ${process.burst_time}
+                    Priority: ${process.priority}
+                    Completion: ${process.completion_time}
+                    Turnaround: ${process.turnaround_time}
+                    Waiting: ${process.waiting_time}`);
+                
+                ganttChart.appendChild(block);
+            });
+        }
+
+        function updateComparisonChart() {
+            const turnaroundValue = parseFloat(document.getElementById('turnaround-value').textContent);
+            const waitingValue = parseFloat(document.getElementById('waiting-value').textContent);
+            const cpuValue = parseFloat(document.getElementById('cpu-value').textContent);
+
+            // Normalize values for the bar width (assuming max value of 100)
+            document.getElementById('turnaround-bar').style.width = `${Math.min(turnaroundValue, 100)}%`;
+            document.getElementById('waiting-bar').style.width = `${Math.min(waitingValue, 100)}%`;
+            document.getElementById('cpu-bar').style.width = `${Math.min(cpuValue, 100)}%`;
+        }
+
+        // Initialize with one process input
+        document.addEventListener('DOMContentLoaded', function() {
+            addProcessInput();
+            const ganttChart = document.getElementById('ganttChart');
+            const scheduleData = ganttChart.dataset.schedule;
+            if (scheduleData) {
+                const schedule = JSON.parse(scheduleData);
+                if (schedule.length > 0) {
+                    updateGanttChart(schedule);
+                    updateComparisonChart();
+                }
             }
-        }
-    
-        function addTaskInput() {
-            const taskBox = document.createElement('div');
-            taskBox.style.marginBottom = '10px';
-            taskBox.innerHTML = `
-                <input type="text" name="task_name[]" placeholder="Task Name" required />
-                <input type="number" name="execution_time[]" placeholder="Execution Time" required />
-                ${algorithmSelect.value === 'priority' ? '<input type="number" name="priority[]" placeholder="Priority" required />' : ''}
-            `;
-            document.getElementById('tasks-container').appendChild(taskBox);
-        }
-    
-        function addAIInput() {
-            const aiBox = document.createElement('div');
-            aiBox.style.marginBottom = '10px';
-            aiBox.innerHTML = `
-                <input type="text" name="task_description[]" placeholder="Describe your task" required />
-            `;
-            document.getElementById('tasks-container').appendChild(aiBox);
-        }
-    
-        algorithmSelect.addEventListener('change', updateFormFields);
-        window.onload = updateFormFields;
+        });
     </script>
-    
 </body>
 </html>
