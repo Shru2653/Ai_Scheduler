@@ -1,571 +1,491 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Scheduler</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+{% extends 'taskmanager/base.html' %}
 
-    <style>
-        :root {
-            --primary-color: #6c63ff;
-            --secondary-color: #4d4d7c;
-            --dark-bg: #1e1e2f;
-            --darker-bg: #1b1b2f;
-            --border-color: #39395d;
-            --text-color: #f5f5f5;
-            --hover-color: #7b73ff;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, var(--dark-bg), var(--secondary-color));
-            color: var(--text-color);
-            min-height: 100vh;
-        }
-
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 2rem auto;
-            background: var(--darker-bg);
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-            overflow: hidden;
-        }
-
-        header {
-            text-align: center;
-            background: var(--secondary-color);
-            color: white;
-            padding: 2rem;
-            border-bottom: 5px solid var(--border-color);
-        }
-
-        header h1 {
-            font-size: 2.5em;
-            margin: 0;
-            background: linear-gradient(135deg, var(--primary-color), #8a85ff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            color: transparent;
-        }
-
-        .content-wrapper {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            padding: 2rem;
-        }
-
-        .task-section {
-            background: var(--secondary-color);
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .task-section h2 {
-            font-size: 1.8em;
-            color: var(--primary-color);
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-
-        label {
-            font-size: 1.1em;
-            font-weight: 600;
-            color: var(--text-color);
-            display: block;
-            margin-bottom: 0.5rem;
-        }
-
-        select, input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 1rem;
-            border-radius: 8px;
-            font-size: 1em;
-            background: var(--dark-bg);
-            border: 2px solid var(--border-color);
-            color: var(--text-color);
-            transition: all 0.3s ease;
-        }
-
-        select:focus, input:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 12px rgba(108, 99, 255, 0.5);
-            outline: none;
-        }
-
-        button {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            width: 100%;
-        }
-
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 15px rgba(108, 99, 255, 0.4);
-            background: linear-gradient(135deg, var(--hover-color), var(--secondary-color));
-        }
-
-        .gantt-container {
-            background: var(--secondary-color);
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .gantt-chart {
-            height: 300px;
-            margin-top: 1rem;
-            position: relative;
-            background: var(--dark-bg);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .process-block {
-            position: absolute;
-            height: 40px;
-            background: linear-gradient(135deg, var(--primary-color), var(--hover-color));
-            border-radius: 4px;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .process-block:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
-
-        .process-block::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 0.5rem;
-            background: var(--dark-bg);
-            color: var(--text-color);
-            border-radius: 4px;
-            font-size: 0.8em;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-
-        .process-block:hover::after {
-            opacity: 1;
-        }
-
-        .metrics-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 2rem;
-            background: var(--dark-bg);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .metrics-table th, .metrics-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .metrics-table th {
-            background: var(--secondary-color);
-            color: var(--text-color);
-            font-weight: 600;
-        }
-
-        .metrics-table tr:hover {
-            background: rgba(108, 99, 255, 0.1);
-        }
-
-        .metrics-summary {
-            margin-top: 2rem;
-            padding: 1.5rem;
-            background: var(--secondary-color);
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .metrics-summary h3 {
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-        }
-
-        .metrics-summary p {
-            margin: 0.5rem 0;
-            font-size: 1.1em;
-        }
-
-        .system-monitor {
-            background: var(--secondary-color);
-            padding: 1.5rem;
-            border-radius: 10px;
-            margin-bottom: 2rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .monitor-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .monitor-item {
-            background: var(--dark-bg);
-            padding: 1rem;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .monitor-value {
-            font-size: 1.5em;
-            font-weight: 600;
-            color: var(--primary-color);
-            margin: 0.5rem 0;
-        }
-
-        .monitor-label {
-            font-size: 0.9em;
-            color: var(--text-color);
-            opacity: 0.8;
-        }
-
-        .progress-bar {
-            height: 8px;
-            background: var(--border-color);
-            border-radius: 4px;
-            margin-top: 0.5rem;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary-color), var(--hover-color));
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-
-        .comparison-chart {
-            background: var(--secondary-color);
-            padding: 2rem;
-            border-radius: 10px;
-            margin-top: 2rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .chart-container {
-            height: 300px;
-            margin-top: 1rem;
-            position: relative;
-            background: var(--dark-bg);
-            border-radius: 8px;
-            padding: 1rem;
-        }
-
-        .metric-bar {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding: 0.5rem;
-            background: var(--dark-bg);
-            border-radius: 4px;
-        }
-
-        .metric-label {
-            width: 150px;
-            font-weight: 600;
-            color: var(--text-color);
-        }
-
-        .metric-value {
-            flex-grow: 1;
-            text-align: right;
-            margin-right: 1rem;
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-
-        .metric-bar-fill {
-            height: 20px;
-            background: linear-gradient(90deg, var(--primary-color), var(--hover-color));
-            border-radius: 4px;
-            transition: width 0.5s ease;
-        }
-
-        .remove-button {
-            background: #ff4444;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .remove-button:hover {
-            background: #ff6666;
-            transform: translateY(-2px);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @media (max-width: 768px) {
-            .content-wrapper {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1>Task Scheduler</h1>
-            <p>Advanced Process Scheduling Visualization</p>
-        </header>
-
-        <div class="system-monitor">
-            <h2>System Resources</h2>
-            <div class="monitor-grid">
-                <div class="monitor-item">
-                    <div class="monitor-label">CPU Usage</div>
-                    <div class="monitor-value" id="cpu-usage">0%</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="cpu-progress"></div>
-                    </div>
-                </div>
-                <div class="monitor-item">
-                    <div class="monitor-label">Memory Usage</div>
-                    <div class="monitor-value" id="memory-usage">0%</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="memory-progress"></div>
-                    </div>
-                </div>
-                <div class="monitor-item">
-                    <div class="monitor-label">Disk Usage</div>
-                    <div class="monitor-value" id="disk-usage">0%</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="disk-progress"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="content-wrapper">
-            <section class="task-section">
-                <h2>Configure Scheduling</h2>
-                <form method="POST" action="/schedule_tasks/">
-                    {% csrf_token %}
-                    <label for="algorithm">Scheduling Algorithm:</label>
-                    <select name="algorithm" id="algorithm" required>
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6 text-center">Task Scheduler</h1>
+    
+    <div class="space-y-8">
+        <!-- Schedule Parameters -->
+        <div class="bg-[var(--darker-bg)] p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold mb-4 text-center text-[var(--text-color)]">Schedule Parameters</h2>
+            <form method="POST" class="space-y-4">
+                {% csrf_token %}
+                
+                <div>
+                    <label class="block text-[var(--text-color)] mb-2">Scheduling Algorithm</label>
+                    <select name="algorithm" class="w-full p-2 rounded bg-[var(--dark-bg)] text-[var(--text-color)] border border-[var(--border-color)] focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)]">
                         <option value="round_robin">Round Robin</option>
                         <option value="priority">Priority Scheduling</option>
                         <option value="ai">AI-Based Prioritization</option>
                     </select>
-                    
-                    <label for="time_quantum">Time Quantum (ms):</label>
-                    <input type="number" id="time_quantum" name="time_quantum" value="2" min="1" required>
-                    
-                    <div id="processes-container">
-                        <label>Process Details:</label>
-                        <div class="process-input-group">
-                            <input type="text" name="process_name[]" placeholder="Process Name" required>
-                            <input type="number" name="arrival_time[]" placeholder="Arrival Time" min="0" required>
-                            <input type="number" name="burst_time[]" placeholder="Burst Time" min="1" required>
-                            <input type="number" name="priority[]" placeholder="Priority" min="0" required>
-                        </div>
-                    </div>
-                    
-                    <button type="button" onclick="addProcessInput()">Add Process</button>
-                    <button type="submit">Generate Schedule</button>
-                </form>
-            </section>
-
-            <section class="gantt-container">
-                <h2>Schedule Visualization</h2>
-                <div class="gantt-chart" id="ganttChart" {% if schedule %}data-schedule="{{ schedule|safe }}"{% endif %}></div>
-                
-                {% if schedule %}
-                <table class="metrics-table">
-                    <thead>
-                        <tr>
-                            <th>Process</th>
-                            <th>Arrival</th>
-                            <th>Burst</th>
-                            <th>Priority</th>
-                            <th>Completion</th>
-                            <th>Turnaround</th>
-                            <th>Waiting</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for process in schedule %}
-                        <tr>
-                            <td>{{ process.process_name }}</td>
-                            <td>{{ process.arrival_time }}</td>
-                            <td>{{ process.burst_time }}</td>
-                            <td>{{ process.priority }}</td>
-                            <td>{{ process.completion_time }}</td>
-                            <td>{{ process.turnaround_time }}</td>
-                            <td>{{ process.waiting_time }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-
-                <div class="metrics-summary">
-                    <h3>Performance Metrics</h3>
-                    <p>Average Turnaround Time: {{ avg_turnaround_time|floatformat:2 }} ms</p>
-                    <p>Average Waiting Time: {{ avg_waiting_time|floatformat:2 }} ms</p>
-                    <p>CPU Utilization: {{ cpu_utilization|floatformat:2 }}%</p>
                 </div>
 
-                <!-- Add Comparison Chart -->
-                <div class="comparison-chart">
-                    <h3>Algorithm Performance Comparison</h3>
-                    <div class="chart-container" id="comparisonChart">
-                        <div class="metric-bar">
-                            <span class="metric-label">Average Turnaround Time</span>
-                            <span class="metric-value" id="turnaround-value">{{ avg_turnaround_time|floatformat:2 }} ms</span>
-                            <div class="metric-bar-fill" id="turnaround-bar"></div>
-                        </div>
-                        <div class="metric-bar">
-                            <span class="metric-label">Average Waiting Time</span>
-                            <span class="metric-value" id="waiting-value">{{ avg_waiting_time|floatformat:2 }} ms</span>
-                            <div class="metric-bar-fill" id="waiting-bar"></div>
-                        </div>
-                        <div class="metric-bar">
-                            <span class="metric-label">CPU Utilization</span>
-                            <span class="metric-value" id="cpu-value">{{ cpu_utilization|floatformat:2 }}%</span>
-                            <div class="metric-bar-fill" id="cpu-bar"></div>
+                <div>
+                    <label class="block text-[var(--text-color)] mb-2">Time Quantum (for Round Robin)</label>
+                    <input type="number" name="time_quantum" value="2" min="1" class="w-full p-2 rounded bg-[var(--dark-bg)] text-[var(--text-color)] border border-[var(--border-color)] focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)]">
+                </div>
+
+                <div id="processes-container" class="space-y-4">
+                    <div class="process-entry p-4 bg-[var(--dark-bg)] rounded-lg border border-[var(--border-color)]">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-[var(--text-color)] mb-2">Process Name</label>
+                                <input type="text" name="process_name[]" required class="w-full p-2 rounded bg-[var(--darker-bg)] text-[var(--text-color)] border border-[var(--border-color)] focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)]">
+                            </div>
+                            <div>
+                                <label class="block text-[var(--text-color)] mb-2">Arrival Time</label>
+                                <input type="number" name="arrival_time[]" required min="0" class="w-full p-2 rounded bg-[var(--darker-bg)] text-[var(--text-color)] border border-[var(--border-color)] focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)]">
+                            </div>
+                            <div>
+                                <label class="block text-[var(--text-color)] mb-2">Burst Time</label>
+                                <input type="number" name="burst_time[]" required min="1" class="w-full p-2 rounded bg-[var(--darker-bg)] text-[var(--text-color)] border border-[var(--border-color)] focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)]">
+                            </div>
+                            <div>
+                                <label class="block text-[var(--text-color)] mb-2">Priority</label>
+                                <input type="number" name="priority[]" required min="1" class="w-full p-2 rounded bg-[var(--darker-bg)] text-[var(--text-color)] border border-[var(--border-color)] focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)]">
+                            </div>
                         </div>
                     </div>
                 </div>
-                {% endif %}
-            </section>
+
+                <div class="flex justify-between mt-6">
+                    <button type="button" id="add-process" class="px-4 py-2 text-white rounded hover:bg-[var(--hover-color)] transition-colors" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
+                        Add Process
+                    </button>
+                    <button type="submit" class="px-6 py-2 text-white rounded hover:bg-[var(--hover-color)] transition-colors" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
+                        Generate Schedule
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Schedule Results -->
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold mb-4 text-center">Schedule Results</h2>
+            
+            {% if result %}
+            <!-- Gantt Chart -->
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4">Gantt Chart</h3>
+                <div class="gantt-container overflow-x-auto">
+                    <div class="gantt-chart bg-gray-700 p-6 rounded-lg shadow-lg min-w-max">
+                        <!-- Timeline -->
+                        <div class="timeline-container mb-6">
+                            <div class="flex">
+                                {% with max_time=result.gantt|last %}
+                                {% for i in "x"|ljust:max_time.end %}
+                                <div class="timeline-unit {% if forloop.counter0|divisibleby:5 %}major-unit{% endif %}">
+                                    <div class="timeline-marker"></div>
+                                    <div class="timeline-label">{{ forloop.counter0 }}</div>
+                                </div>
+                                {% endfor %}
+                                {% endwith %}
+                            </div>
+                        </div>
+
+                        <!-- Process Bars -->
+                        <div class="process-bars">
+                            {% for item in result.gantt %}
+                            <div class="process-row">
+                                <div class="process-name">{{ item.process }}</div>
+                                <div class="process-timeline">
+                                    {% with max_time=result.gantt|last %}
+                                    {% for i in "x"|ljust:max_time.end %}
+                                    <div class="timeline-cell {% if forloop.counter0 >= item.start and forloop.counter0 < item.end %}active{% endif %}">
+                                        {% if forloop.counter0 == item.start %}
+                                        <div class="process-bar" 
+                                             data-process="{{ item.process }}"
+                                             data-start="{{ item.start }}"
+                                             data-end="{{ item.end }}">
+                                            <div class="process-bar-content">
+                                                <span class="process-time">{{ item.start }}-{{ item.end }}</span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                    {% endwith %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metrics Table -->
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4">Process Metrics</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-gray-700 rounded-lg">
+                        <thead>
+                            <tr class="bg-gray-800">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Process</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Completion Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Turnaround Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Waiting Time</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-600">
+                            {% for metric in result.metrics %}
+                            <tr class="hover:bg-gray-600 transition-colors">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{{ metric.process }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{{ metric.ct }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{{ metric.tat }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{{ metric.wt }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Summary Statistics -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <p class="text-gray-400">Average Turnaround Time</p>
+                    <p class="text-2xl font-bold text-green-400">{{ avg_tat|default:0|floatformat:2 }}</p>
+                </div>
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <p class="text-gray-400">Average Waiting Time</p>
+                    <p class="text-2xl font-bold text-green-400">{{ avg_wt|default:0|floatformat:2 }}</p>
+                </div>
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <p class="text-gray-400">CPU Utilization</p>
+                    <p class="text-2xl font-bold text-green-400">{{ cpu_utilization|default:0|floatformat:2 }}%</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center text-gray-400 py-8">
+                <p>Submit the form to generate a schedule</p>
+            </div>
+            {% endif %}
         </div>
     </div>
+</div>
 
-    <script>
-        // Add system monitoring functionality
-        function updateSystemStats() {
-            fetch('/get_system_stats/')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('cpu-usage').textContent = `${data.cpu}%`;
-                    document.getElementById('memory-usage').textContent = `${data.memory}%`;
-                    document.getElementById('disk-usage').textContent = `${data.disk}%`;
-                    
-                    document.getElementById('cpu-progress').style.width = `${data.cpu}%`;
-                    document.getElementById('memory-progress').style.width = `${data.memory}%`;
-                    document.getElementById('disk-progress').style.width = `${data.disk}%`;
-                });
-        }
+<style>
+    .gantt-container {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.1);
+    }
 
-        // Update system stats every 2 seconds
-        setInterval(updateSystemStats, 2000);
-        updateSystemStats();
+    .gantt-container::-webkit-scrollbar {
+        height: 8px;
+    }
 
-        function addProcessInput() {
-            const container = document.getElementById('processes-container');
-            const processGroup = document.createElement('div');
-            processGroup.className = 'process-input-group';
-            processGroup.innerHTML = `
-                <input type="text" name="process_name[]" placeholder="Process Name" required>
-                <input type="number" name="arrival_time[]" placeholder="Arrival Time" min="0" required>
-                <input type="number" name="burst_time[]" placeholder="Burst Time" min="1" required>
-                <input type="number" name="priority[]" placeholder="Priority" min="0" required>
-                <button type="button" onclick="this.parentElement.remove()" class="remove-button">Remove</button>
-            `;
-            container.appendChild(processGroup);
-        }
+    .gantt-container::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+    }
 
-        function updateGanttChart(schedule) {
-            const ganttChart = document.getElementById('ganttChart');
-            ganttChart.innerHTML = '';
+    .gantt-container::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+    }
+
+    .gantt-chart {
+        position: relative;
+        min-height: 300px;
+        background: #1a1a2e;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        min-width: max-content;
+    }
+
+    .timeline-container {
+        position: sticky;
+        top: 0;
+        background: rgba(255, 255, 255, 0.05);
+        z-index: 2;
+        padding-bottom: 16px;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        margin-bottom: 24px;
+        min-width: max-content;
+    }
+
+    .timeline-unit {
+        position: relative;
+        min-width: 50px;
+        height: 40px;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .major-unit {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .timeline-marker {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 2px;
+        height: 12px;
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .timeline-label {
+        position: absolute;
+        bottom: -24px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .process-bars {
+        margin-top: 40px;
+        min-width: max-content;
+    }
+
+    .process-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 8px;
+        padding: 0 16px;
+        min-width: max-content;
+    }
+
+    .process-name {
+        width: 120px;
+        padding-right: 16px;
+        font-weight: 600;
+        font-size: 1.125rem;
+        color: rgba(255, 255, 255, 0.9);
+        position: sticky;
+        left: 0;
+        z-index: 1;
+    }
+
+    .process-timeline {
+        flex: 1;
+        display: flex;
+        position: relative;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 6px;
+        min-width: max-content;
+    }
+
+    .timeline-cell {
+        min-width: 50px;
+        height: 100%;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        position: relative;
+    }
+
+    .process-bar {
+        position: absolute;
+        height: 40px;
+        top: 10px;
+        left: 0;
+        background: linear-gradient(135deg, #4CAF50, #8BC34A);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .process-bar-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        padding: 0 12px;
+    }
+
+    .process-time {
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    .process-bar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.getElementById('add-process').addEventListener('click', function() {
+    const container = document.getElementById('processes-container');
+    const template = container.firstElementChild.cloneNode(true);
+    
+    // Clear input values
+    template.querySelectorAll('input').forEach(input => {
+        input.value = '';
+    });
+    
+    container.appendChild(template);
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Set different colors for each process and calculate widths
+    const processBars = document.querySelectorAll('.process-bar');
+    const colors = [
+        'linear-gradient(135deg, #4CAF50, #8BC34A)',
+        'linear-gradient(135deg, #2196F3, #03A9F4)',
+        'linear-gradient(135deg, #FF9800, #FFC107)',
+        'linear-gradient(135deg, #E91E63, #F06292)',
+        'linear-gradient(135deg, #9C27B0, #BA68C8)',
+        'linear-gradient(135deg, #3F51B5, #7986CB)',
+        'linear-gradient(135deg, #00BCD4, #4DD0E1)',
+        'linear-gradient(135deg, #FF5722, #FF8A65)'
+    ];
+
+    processBars.forEach((bar, index) => {
+        // Set color
+        bar.style.background = colors[index % colors.length];
+        
+        // Calculate and set width based on start and end times
+        const start = parseInt(bar.dataset.start);
+        const end = parseInt(bar.dataset.end);
+        const duration = end - start;
+        const cellWidth = 50; // Reduced width of each time unit in pixels
+        bar.style.width = `${duration * cellWidth}px`;
+    });
+
+    // Process Details Panel
+    const processDetails = document.getElementById('processDetails');
+    
+    processBars.forEach(bar => {
+        bar.addEventListener('click', function(e) {
+            e.stopPropagation();
             
-            let maxTime = 0;
-            schedule.forEach(process => {
-                maxTime = Math.max(maxTime, process.completion_time);
-            });
+            // Update details panel
+            document.getElementById('detailProcessName').textContent = this.dataset.process;
+            document.getElementById('detailStartTime').textContent = this.dataset.start;
+            document.getElementById('detailEndTime').textContent = this.dataset.end;
+            document.getElementById('detailDuration').textContent = 
+                parseInt(this.dataset.end) - parseInt(this.dataset.start);
+            document.getElementById('detailWaitingTime').textContent = this.dataset.waitingTime;
+            
+            // Position and show panel
+            const rect = this.getBoundingClientRect();
+            processDetails.style.top = `${rect.top - processDetails.offsetHeight - 10}px`;
+            processDetails.style.left = `${rect.left}px`;
+            processDetails.classList.remove('hidden');
+        });
+    });
 
-            schedule.forEach((process, index) => {
-                const block = document.createElement('div');
-                block.className = 'process-block';
-                block.textContent = process.process_name;
-                
-                const left = (process.arrival_time / maxTime) * 100;
-                const width = ((process.completion_time - process.arrival_time) / maxTime) * 100;
-                
-                block.style.left = `${left}%`;
-                block.style.width = `${width}%`;
-                block.style.top = `${index * 50}px`;
-                
-                block.setAttribute('data-tooltip', 
-                    `Process: ${process.process_name}
-                    Arrival: ${process.arrival_time}
-                    Burst: ${process.burst_time}
-                    Priority: ${process.priority}
-                    Completion: ${process.completion_time}
-                    Turnaround: ${process.turnaround_time}
-                    Waiting: ${process.waiting_time}`);
-                
-                ganttChart.appendChild(block);
-            });
+    // Close details panel
+    document.querySelector('.close-details').addEventListener('click', function() {
+        processDetails.classList.add('hidden');
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!processDetails.contains(e.target) && !e.target.closest('.process-bar')) {
+            processDetails.classList.add('hidden');
         }
+    });
 
-        function updateComparisonChart() {
-            const turnaroundValue = parseFloat(document.getElementById('turnaround-value').textContent);
-            const waitingValue = parseFloat(document.getElementById('waiting-value').textContent);
-            const cpuValue = parseFloat(document.getElementById('cpu-value').textContent);
-
-            // Normalize values for the bar width (assuming max value of 100)
-            document.getElementById('turnaround-bar').style.width = `${Math.min(turnaroundValue, 100)}%`;
-            document.getElementById('waiting-bar').style.width = `${Math.min(waitingValue, 100)}%`;
-            document.getElementById('cpu-bar').style.width = `${Math.min(cpuValue, 100)}%`;
-        }
-
-        // Initialize with one process input
-        document.addEventListener('DOMContentLoaded', function() {
-            addProcessInput();
-            const ganttChart = document.getElementById('ganttChart');
-            const scheduleData = ganttChart.dataset.schedule;
-            if (scheduleData) {
-                const schedule = JSON.parse(scheduleData);
-                if (schedule.length > 0) {
-                    updateGanttChart(schedule);
-                    updateComparisonChart();
+    // Initialize performance metrics charts
+    const metricsData = JSON.parse('{{ result.metrics|safe|escapejs }}');
+    
+    // Turnaround Time Chart
+    new Chart(document.getElementById('turnaroundChart'), {
+        type: 'bar',
+        data: {
+            labels: metricsData.map(m => m.process),
+            datasets: [{
+                label: 'Turnaround Time',
+                data: metricsData.map(m => m.tat),
+                backgroundColor: 'rgba(108, 99, 255, 0.7)',
+                borderColor: 'rgba(108, 99, 255, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#a0a0a0'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#a0a0a0'
+                    }
                 }
             }
-        });
-    </script>
-</body>
-</html>
+        }
+    });
+
+    // Waiting Time Chart
+    new Chart(document.getElementById('waitingChart'), {
+        type: 'bar',
+        data: {
+            labels: metricsData.map(m => m.process),
+            datasets: [{
+                label: 'Waiting Time',
+                data: metricsData.map(m => m.wt),
+                backgroundColor: 'rgba(76, 175, 80, 0.7)',
+                borderColor: 'rgba(76, 175, 80, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#a0a0a0'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#a0a0a0'
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.3s ease forwards;
+        opacity: 0;
+    }
+</style>
+{% endblock %}

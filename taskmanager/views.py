@@ -197,6 +197,14 @@ def home(request):
 
 @login_required
 def schedule_tasks(request):
+    context = {
+        'result': None,
+        'avg_tat': 0,
+        'avg_wt': 0,
+        'algorithm': None,
+        'time_quantum': 2
+    }
+    
     if request.method == "POST":
         algorithm = request.POST.get("algorithm")
         time_quantum = int(request.POST.get("time_quantum", 2))
@@ -207,15 +215,24 @@ def schedule_tasks(request):
         burst_times = request.POST.getlist("burst_time[]")
         priorities = request.POST.getlist("priority[]")
         
+        # Validate input
+        if not all([process_names, arrival_times, burst_times, priorities]):
+            context['error'] = "Please fill in all process details"
+            return render(request, 'taskmanager/schedule.html', context)
+        
         # Create processes list
         processes = []
         for i in range(len(process_names)):
-            processes.append({
-                'process_name': process_names[i],
-                'arrival_time': int(arrival_times[i]),
-                'burst_time': int(burst_times[i]),
-                'priority': int(priorities[i])
-            })
+            try:
+                processes.append({
+                    'name': process_names[i],
+                    'arrival_time': int(arrival_times[i]),
+                    'execution_time': int(burst_times[i]),
+                    'priority': int(priorities[i])
+                })
+            except ValueError:
+                context['error'] = "Invalid input values"
+                return render(request, 'taskmanager/schedule.html', context)
         
         # Generate schedule based on selected algorithm
         if algorithm == "round_robin":
@@ -225,28 +242,22 @@ def schedule_tasks(request):
         elif algorithm == "ai":
             result = ai_based_prioritization(processes)
         else:
-            result = []
+            result = {"gantt": [], "metrics": []}
         
-        # Calculate performance metrics
-        total_turnaround = sum(p['turnaround_time'] for p in processes)
-        total_waiting = sum(p['waiting_time'] for p in processes)
-        num_processes = len(processes)
-        
-        # Calculate CPU utilization
-        total_burst_time = sum(p['burst_time'] for p in processes)
-        total_time = max(p['completion_time'] for p in processes)
-        cpu_utilization = (total_burst_time / total_time) * 100 if total_time > 0 else 0
-        
-        context = {
-            'schedule': processes,
-            'result': result,
-            'avg_turnaround_time': total_turnaround / num_processes if num_processes > 0 else 0,
-            'avg_waiting_time': total_waiting / num_processes if num_processes > 0 else 0,
-            'cpu_utilization': cpu_utilization
-        }
-        
-        return render(request, "taskmanager/schedule.html", context)
+        # Calculate average metrics
+        if result['metrics']:
+            total_wt = sum(metric['wt'] for metric in result['metrics'])
+            total_tat = sum(metric['tat'] for metric in result['metrics'])
+            avg_wt = total_wt / len(result['metrics'])
+            avg_tat = total_tat / len(result['metrics'])
+            
+            context.update({
+                'result': result,
+                'algorithm': algorithm,
+                'time_quantum': time_quantum,
+                'avg_wt': round(avg_wt, 2),
+                'avg_tat': round(avg_tat, 2)
+            })
     
-    # Initial render with empty context
-    return render(request, "taskmanager/schedule.html")
+    return render(request, 'taskmanager/schedule.html', context)
 

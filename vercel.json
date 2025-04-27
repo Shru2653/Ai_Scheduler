@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "taskmanager/templates/**/*.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "taskmanager/static/**/*",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/taskmanager/templates/$1"
+    }
+  ]
+} 
