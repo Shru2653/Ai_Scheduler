@@ -1,0 +1,20 @@
+{% extends 'taskmanager/base.html' %}
+
+{% block title %}Home - AI Task Scheduler{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-[var(--darker-bg)] p-6 rounded-lg shadow-lg text-center">
+        <h1 class="text-3xl font-bold mb-4">Welcome, {{ user.username }}!</h1>
+        <p class="text-xl mb-6">You are logged in to the AI Task Scheduler.</p>
+        <div class="flex justify-center space-x-4">
+            <a href="{% url 'taskmanager:dashboard' %}" class="btn btn-primary">
+                <i class="fas fa-tachometer-alt mr-2"></i>Go to Dashboard
+            </a>
+            <a href="{% url 'logout' %}" class="btn btn-secondary">
+                <i class="fas fa-sign-out-alt mr-2"></i>Logout
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

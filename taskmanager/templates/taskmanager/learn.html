@@ -1,0 +1,1446 @@
+{% extends 'taskmanager/base.html' %}
+{% load static %}
+
+{% block title %}Learn Scheduling Algorithms{% endblock %}
+
+{% block content %}
+<div id="learn-root" class="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-gray-100 transition-colors duration-300">
+    <!-- Main Container -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 mb-4">
+                Operating Systems Learning Hub
+            </h1>
+            <p class="text-gray-400 text-lg">Master the fundamentals of OS concepts through interactive learning</p>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="grid grid-cols-12 gap-6">
+            <!-- Left Navigation -->
+            <div class="col-span-3 bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 shadow-xl border border-gray-700/50 overflow-y-auto" style="max-height: 90vh;">
+                <h2 class="text-xl font-bold mb-6 text-blue-400">Learning Modules</h2>
+                <div class="space-y-3">
+                    <button class="algo-btn w-full p-3 rounded-lg bg-gray-700/50 hover:bg-blue-600/50 transition-all duration-300 flex items-center group" data-algo="FCFS">
+                        <i class="fas fa-clock mr-3 text-blue-400 group-hover:text-white"></i>
+                        <span class="group-hover:text-white">FCFS</span>
+                    </button>
+                    <button class="algo-btn w-full p-3 rounded-lg bg-gray-700/50 hover:bg-blue-600/50 transition-all duration-300 flex items-center group" data-algo="SJF">
+                        <i class="fas fa-bolt mr-3 text-blue-400 group-hover:text-white"></i>
+                        <span class="group-hover:text-white">SJF</span>
+                    </button>
+                    <button class="algo-btn w-full p-3 rounded-lg bg-gray-700/50 hover:bg-blue-600/50 transition-all duration-300 flex items-center group" data-algo="RR">
+                        <i class="fas fa-sync-alt mr-3 text-blue-400 group-hover:text-white"></i>
+                        <span class="group-hover:text-white">Round Robin</span>
+                    </button>
+                    <button class="algo-btn w-full p-3 rounded-lg bg-gray-700/50 hover:bg-blue-600/50 transition-all duration-300 flex items-center group" data-algo="Priority">
+                        <i class="fas fa-flag mr-3 text-blue-400 group-hover:text-white"></i>
+                        <span class="group-hover:text-white">Priority</span>
+                    </button>
+                    <button class="algo-btn w-full p-3 rounded-lg bg-gray-700/50 hover:bg-blue-600/50 transition-all duration-300 flex items-center group" data-algo="Deadlock">
+                        <i class="fas fa-ban mr-3 text-blue-400 group-hover:text-white"></i>
+                        <span class="group-hover:text-white">Deadlock</span>
+                    </button>
+                    <button class="algo-btn w-full p-3 rounded-lg bg-gray-700/50 hover:bg-blue-600/50 transition-all duration-300 flex items-center group" data-algo="VirtualMemory">
+                        <i class="fas fa-memory mr-3 text-blue-400 group-hover:text-white"></i>
+                        <span class="group-hover:text-white">Virtual Memory</span>
+                    </button>
+                    <button class="algo-btn w-full p-3 rounded-lg bg-gray-700/50 hover:bg-blue-600/50 transition-all duration-300 flex items-center group" data-algo="Semaphores">
+                        <i class="fas fa-lock mr-3 text-blue-400 group-hover:text-white"></i>
+                        <span class="group-hover:text-white">Semaphores</span>
+                    </button>
+                    <button class="algo-btn w-full p-3 rounded-lg bg-gray-700/50 hover:bg-blue-600/50 transition-all duration-300 flex items-center group" data-algo="ContextSwitching">
+                        <i class="fas fa-exchange-alt mr-3 text-blue-400 group-hover:text-white"></i>
+                        <span class="group-hover:text-white">Context Switching</span>
+                    </button>
+                    <button class="algo-btn w-full p-3 rounded-lg bg-gray-700/50 hover:bg-blue-600/50 transition-all duration-300 flex items-center group" data-algo="Thrashing">
+                        <i class="fas fa-fire mr-3 text-blue-400 group-hover:text-white"></i>
+                        <span class="group-hover:text-white">Thrashing</span>
+                    </button>
+                    <button class="algo-btn w-full p-3 rounded-lg bg-gray-700/50 hover:bg-blue-600/50 transition-all duration-300 flex items-center group" data-algo="FileSystems">
+                        <i class="fas fa-folder-open mr-3 text-blue-400 group-hover:text-white"></i>
+                        <span class="group-hover:text-white">File Systems</span>
+                    </button>
+                    <button class="algo-btn w-full p-3 rounded-lg bg-gray-700/50 hover:bg-blue-600/50 transition-all duration-300 flex items-center group" data-algo="SystemCalls">
+                        <i class="fas fa-terminal mr-3 text-blue-400 group-hover:text-white"></i>
+                        <span class="group-hover:text-white">System Calls</span>
+                    </button>
+                    <button class="algo-btn w-full p-3 rounded-lg bg-gray-700/50 hover:bg-blue-600/50 transition-all duration-300 flex items-center group" data-algo="Starvation">
+                        <i class="fas fa-hourglass-end mr-3 text-blue-400 group-hover:text-white"></i>
+                        <span class="group-hover:text-white">Starvation</span>
+                    </button>
+                    <button class="algo-btn w-full p-3 rounded-lg bg-gray-700/50 hover:bg-blue-600/50 transition-all duration-300 flex items-center group" data-algo="CriticalSection">
+                        <i class="fas fa-code mr-3 text-blue-400 group-hover:text-white"></i>
+                        <span class="group-hover:text-white">Critical Section</span>
+                    </button>
+                    <button class="algo-btn w-full p-3 rounded-lg bg-gray-700/50 hover:bg-blue-600/50 transition-all duration-300 flex items-center group" data-algo="Paging">
+                        <i class="fas fa-th-list mr-3 text-blue-400 group-hover:text-white"></i>
+                        <span class="group-hover:text-white">Paging</span>
+                    </button>
+                </div>
+                <a href="{% url 'taskmanager:schedule_tasks' %}" class="mt-6 block w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white p-3 rounded-lg transition-all duration-300 text-center font-medium shadow-lg hover:shadow-green-500/20">
+                    Try Your Own!
+                </a>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-span-6 bg-gray-800/50 backdrop-blur-sm rounded-xl p-8 shadow-xl border border-gray-700/50 relative overflow-y-auto" style="max-height: 90vh;" id="main-content">
+                <button id="toggle-mode" class="absolute top-4 right-4 px-4 py-2 rounded-lg bg-gray-700/50 hover:bg-blue-600/50 transition-all duration-300 flex items-center gap-2">
+                    <span id="mode-icon" class="text-xl">🌙</span>
+                    <span id="mode-label" class="text-sm">Dark Mode</span>
+                </button>
+                
+                <div id="loading-overlay" class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center hidden z-50">
+                    <div class="animate-spin rounded-full h-16 w-16 border-4 border-blue-400 border-t-transparent"></div>
+                </div>
+                
+                <div id="error-message" class="hidden bg-red-900/50 backdrop-blur-sm border border-red-400 text-red-200 px-6 py-4 rounded-lg mb-6"></div>
+                
+                <div id="badges-area" class="flex gap-2 mb-6"></div>
+                
+                <div id="confetti" class="fixed inset-0 pointer-events-none z-50" style="display:none;"></div>
+
+                <!-- Default Content -->
+                <div class="text-center py-12">
+                    <div class="text-6xl mb-6">🎓</div>
+                    <h2 class="text-2xl font-bold text-gray-300 mb-4">Welcome to the Learning Hub</h2>
+                    <p class="text-gray-400">Select a topic from the left menu to start learning</p>
+                </div>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="col-span-3 bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 shadow-xl border border-gray-700/50">
+                <h2 class="text-xl font-bold mb-6 text-blue-400">Your Progress</h2>
+                
+                <!-- Progress Bar -->
+                <div class="mb-8">
+                    <div class="h-3 bg-gray-700/50 rounded-full mb-2 overflow-hidden">
+                        <div id="progress-bar" class="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <p class="text-sm text-gray-400">Completed: <span id="progress-text" class="text-blue-400">0%</span></p>
+                </div>
+
+                <!-- Score Panel -->
+                <div id="score-panel" class="bg-gray-700/30 rounded-xl p-6 mb-8 text-center border border-gray-700/50">
+                    <div class="text-4xl font-bold text-blue-400 mb-2" id="score">0</div>
+                    <div class="text-sm text-gray-400">Total Points</div>
+                </div>
+
+                <!-- Level Progress -->
+                <div id="level-bar" class="mb-8">
+                    <div class="text-sm text-gray-400 mb-2">Level Progress</div>
+                    <div class="h-3 bg-gray-700/50 rounded-full overflow-hidden">
+                        <div id="level-progress" class="h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Input Modal -->
+<div id="custom-modal" class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="bg-gray-800 rounded-xl p-8 w-full max-w-lg relative border border-gray-700/50">
+        <button id="close-custom-modal" class="absolute top-4 right-4 text-gray-400 hover:text-red-400 transition-colors duration-300">
+            <i class="fas fa-times text-xl"></i>
+        </button>
+        
+        <h2 class="text-2xl font-bold mb-6 text-blue-400">Custom Process Input</h2>
+        
+        <form id="custom-form" class="space-y-6">
+            <div class="grid grid-cols-4 gap-4">
+                <input type="text" class="bg-gray-700/30 text-gray-100 rounded-lg p-3 border border-gray-700/50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-300" placeholder="Process (e.g. P1)" required />
+                <input type="number" class="bg-gray-700/30 text-gray-100 rounded-lg p-3 border border-gray-700/50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-300" placeholder="Arrival" min="0" required />
+                <input type="number" class="bg-gray-700/30 text-gray-100 rounded-lg p-3 border border-gray-700/50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-300" placeholder="Burst" min="1" required />
+                <input type="number" class="bg-gray-700/30 text-gray-100 rounded-lg p-3 border border-gray-700/50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-300" placeholder="Priority (opt)" min="1" />
+            </div>
+            
+            <button type="button" id="add-process" class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg px-4 py-3 transition-all duration-300 font-medium shadow-lg hover:shadow-green-500/20">
+                Add Process
+            </button>
+            
+            <div id="custom-process-list" class="text-sm text-gray-300"></div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <select id="custom-algo" class="bg-gray-700/30 text-gray-100 rounded-lg p-3 border border-gray-700/50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-300">
+                    <option value="FCFS">FCFS</option>
+                    <option value="SJF">SJF</option>
+                    <option value="RR">Round Robin</option>
+                    <option value="Priority">Priority</option>
+                </select>
+                <input type="number" id="custom-quantum" class="bg-gray-700/30 text-gray-100 rounded-lg p-3 border border-gray-700/50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-300" placeholder="Quantum (RR)" min="1" />
+            </div>
+            
+            <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg px-4 py-3 transition-all duration-300 font-medium shadow-lg hover:shadow-blue-500/20">
+                Visualize
+            </button>
+        </form>
+        
+        <div id="custom-error" class="mt-4 text-red-400 hidden"></div>
+        <div id="custom-gantt" class="mt-6"></div>
+    </div>
+</div>
+
+<!-- Confetti Animation -->
+<style>
+@keyframes confetti-fall {
+    0% { transform: translateY(-100vh) rotateZ(0deg); }
+    100% { transform: translateY(100vh) rotateZ(360deg); }
+}
+.confetti-piece {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    opacity: 0.8;
+    animation: confetti-fall 2.5s linear forwards;
+}
+</style>
+
+<script>
+const modules = {
+    FCFS: {
+        title: "First Come, First Serve (FCFS)",
+        explanation: `
+            <div class="mb-6">
+                <span class="text-2xl font-bold text-blue-300">What is FCFS?</span>
+                <p class="mt-2 text-gray-100">FCFS (First Come, First Serve) is the simplest CPU scheduling algorithm. The process that arrives first is executed first, and all others wait their turn. It is <b>non-preemptive</b>: once a process starts, it runs to completion.</p>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Why is it important?</span>
+                <ul class="list-disc ml-6 mt-1 text-gray-100">
+                    <li>Easy to implement and understand.</li>
+                    <li>Used as a baseline for comparing other algorithms.</li>
+                </ul>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">How does it work?</span>
+                <ol class="list-decimal ml-6 mt-1 text-gray-100">
+                    <li>All processes are placed in a queue as they arrive.</li>
+                    <li>The CPU picks the process at the front and runs it until it finishes.</li>
+                    <li>The next process is selected, and so on.</li>
+                </ol>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Real-World Analogy</span>
+                <p class="mt-1 text-gray-100">A line at a ticket counter: the first person in line is served first, regardless of how long they'll take.</p>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Step-by-Step Example</span>
+                <table class="table-auto w-full text-sm mb-2 mt-2">
+                    <thead><tr class="text-left"><th>Process</th><th>Arrival Time</th><th>Burst Time</th></tr></thead>
+                    <tbody>
+                        <tr><td>P1</td><td>0</td><td>5</td></tr>
+                        <tr><td>P2</td><td>1</td><td>3</td></tr>
+                        <tr><td>P3</td><td>2</td><td>1</td></tr>
+                    </tbody>
+                </table>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>At time 0, P1 starts and runs for 5 units.</li>
+                    <li>P2 and P3 wait until P1 finishes.</li>
+                    <li>P2 runs next, then P3.</li>
+                </ul>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Interactive Animation</span>
+                <div class="flex flex-col items-center mt-2">
+                    <button id="fcfs-play-animation" class="mb-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition">Play Animation</button>
+                    <div id="fcfs-animation-area" class="w-full flex justify-center"></div>
+                </div>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Gantt Chart</span>
+                <div class="flex justify-center"><canvas id="gantt-chart" width="400" height="60"></canvas></div>
+                <div class="text-xs text-gray-400 text-center mt-1">| P1 | P2 | P3 |<br>0&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;8&nbsp;&nbsp;&nbsp;&nbsp;9</div>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-green-400">Advantages</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Simple and fair (no process is skipped).</li>
+                    <li>No starvation.</li>
+                </ul>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-red-400">Disadvantages</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Can cause the "convoy effect": short jobs wait behind long jobs.</li>
+                    <li>High average waiting time.</li>
+                </ul>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Where is it used?</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Simple batch systems.</li>
+                    <li>As a baseline for comparing more advanced algorithms.</li>
+                </ul>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Common Questions</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li><b>Q:</b> What happens if a short process arrives after a long one?<br><b>A:</b> It must wait until the long process finishes.</li>
+                    <li><b>Q:</b> Is FCFS preemptive?<br><b>A:</b> No, once a process starts, it runs to completion.</li>
+                </ul>
+            </div>
+        `,
+        gantt: [ {label: 'P1', start: 0, end: 5}, {label: 'P2', start: 5, end: 8}, {label: 'P3', start: 8, end: 9} ],
+        quiz: [
+            { question: "What is the main principle of FCFS?", options: ["Shortest job first", "First come, first served", "Priority based"], answer: "First come, first served" },
+            { question: "Is FCFS preemptive?", options: ["Yes", "No"], answer: "No" },
+            { question: "What is a disadvantage of FCFS?", options: ["Starvation", "Convoy effect", "Difficult to implement"], answer: "Convoy effect" }
+        ]
+    },
+    SJF: {
+        title: "Shortest Job First (SJF)",
+        explanation: `
+            <div class="mb-6">
+                <span class="text-2xl font-bold text-blue-300">What is SJF?</span>
+                <p class="mt-2 text-gray-100">SJF (Shortest Job First) is a CPU scheduling algorithm that always selects the process with the shortest burst time from the ready queue. It can be <b>non-preemptive</b> (once a process starts, it runs to completion) or <b>preemptive</b> (Shortest Remaining Time First, SRTF).</p>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Why is it important?</span>
+                <ul class="list-disc ml-6 mt-1 text-gray-100">
+                    <li>Minimizes average waiting time (optimal for batch systems).</li>
+                    <li>Helps understand the impact of job length on scheduling.</li>
+                </ul>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">How does it work?</span>
+                <ol class="list-decimal ml-6 mt-1 text-gray-100">
+                    <li>When the CPU is free, it picks the process with the shortest burst time from the ready queue.</li>
+                    <li>In non-preemptive SJF, the process runs to completion. In preemptive SJF (SRTF), a new process with a shorter burst can preempt the current one.</li>
+                </ol>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Real-World Analogy</span>
+                <p class="mt-1 text-gray-100">A doctor seeing patients with the shortest consultation time first, so the waiting room empties faster.</p>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Step-by-Step Example</span>
+                <table class="table-auto w-full text-sm mb-2 mt-2">
+                    <thead><tr class="text-left"><th>Process</th><th>Arrival Time</th><th>Burst Time</th></tr></thead>
+                    <tbody>
+                        <tr><td>P1</td><td>0</td><td>8</td></tr>
+                        <tr><td>P2</td><td>1</td><td>4</td></tr>
+                        <tr><td>P3</td><td>2</td><td>2</td></tr>
+                    </tbody>
+                </table>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>At time 0, P1 starts (no other process yet).</li>
+                    <li>When P1 finishes, P3 (shortest) is next, then P2.</li>
+                </ul>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Interactive Animation</span>
+                <div class="flex flex-col items-center mt-2">
+                    <button id="sjf-play-animation" class="mb-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition">Play Animation</button>
+                    <div id="sjf-animation-area" class="w-full flex justify-center"></div>
+                </div>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Gantt Chart</span>
+                <div class="flex justify-center"><canvas id="gantt-chart" width="400" height="60"></canvas></div>
+                <div class="text-xs text-gray-400 text-center mt-1">| P1 | P3 | P2 |<br>0&nbsp;&nbsp;&nbsp;&nbsp;8&nbsp;&nbsp;&nbsp;&nbsp;10&nbsp;&nbsp;&nbsp;&nbsp;14</div>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-green-400">Advantages</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Minimizes average waiting time.</li>
+                </ul>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-red-400">Disadvantages</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Difficult to predict burst time.</li>
+                    <li>May cause starvation for long jobs.</li>
+                </ul>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Where is it used?</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Batch processing systems.</li>
+                </ul>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Common Questions</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li><b>Q:</b> Can SJF be preemptive?<br><b>A:</b> Yes, as Shortest Remaining Time First (SRTF).</li>
+                </ul>
+            </div>
+        `,
+        gantt: [ {label: 'P1', start: 0, end: 8}, {label: 'P3', start: 8, end: 10}, {label: 'P2', start: 10, end: 14} ],
+        quiz: [
+            { question: "What does SJF prioritize?", options: ["Shortest burst time", "First arrival", "Highest priority"], answer: "Shortest burst time" },
+            { question: "What is a disadvantage of SJF?", options: ["Starvation", "Convoy effect", "High waiting time"], answer: "Starvation" },
+            { question: "Is SJF always preemptive?", options: ["Yes", "No"], answer: "No" }
+        ]
+    },
+    RR: {
+        title: "Round Robin (RR)",
+        explanation: `
+            <div class="mb-6">
+                <span class="text-2xl font-bold text-blue-300">What is Round Robin?</span>
+                <p class="mt-2 text-gray-100">Round Robin (RR) is a preemptive CPU scheduling algorithm where each process gets a fixed time slice (quantum). After its time slice, it goes to the back of the queue if not finished. This continues in a circular fashion until all processes are complete.</p>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Why is it important?</span>
+                <ul class="list-disc ml-6 mt-1 text-gray-100">
+                    <li>Fair and responsive; good for time-sharing and interactive systems.</li>
+                    <li>Prevents starvation and ensures all processes get CPU time.</li>
+                </ul>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">How does it work?</span>
+                <ol class="list-decimal ml-6 mt-1 text-gray-100">
+                    <li>Processes are placed in a circular queue as they arrive.</li>
+                    <li>Each process gets a time quantum (e.g., 2 units).</li>
+                    <li>If not finished, it moves to the back of the queue; otherwise, it completes.</li>
+                </ol>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Real-World Analogy</span>
+                <p class="mt-1 text-gray-100">A teacher gives each student 2 minutes to speak, then moves to the next. If a student isn't done, they wait for their next turn.</p>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Step-by-Step Example</span>
+                <table class="table-auto w-full text-sm mb-2 mt-2">
+                    <thead><tr class="text-left"><th>Process</th><th>Arrival Time</th><th>Burst Time</th></tr></thead>
+                    <tbody>
+                        <tr><td>P1</td><td>0</td><td>5</td></tr>
+                        <tr><td>P2</td><td>1</td><td>3</td></tr>
+                        <tr><td>P3</td><td>2</td><td>1</td></tr>
+                    </tbody>
+                </table>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Quantum = 2</li>
+                    <li>P1 runs for 2, then P2 for 2, P3 for 1, then P1 for 3, etc.</li>
+                </ul>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Interactive Animation</span>
+                <div class="flex flex-col items-center mt-2">
+                    <button id="rr-play-animation" class="mb-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition">Play Animation</button>
+                    <div id="rr-animation-area" class="w-full flex justify-center"></div>
+                </div>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Gantt Chart</span>
+                <div class="flex justify-center"><canvas id="gantt-chart" width="500" height="60"></canvas></div>
+                <div class="text-xs text-gray-400 text-center mt-1">| P1 | P2 | P3 | P1 | P2 | P1 |<br>0&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;8&nbsp;&nbsp;&nbsp;&nbsp;9&nbsp;&nbsp;&nbsp;&nbsp;10</div>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-green-400">Advantages</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>No starvation; all processes get CPU time.</li>
+                    <li>Good response time for interactive users.</li>
+                </ul>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-red-400">Disadvantages</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Too small quantum: too many context switches.</li>
+                    <li>Too large: behaves like FCFS.</li>
+                </ul>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Where is it used?</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Interactive/time-sharing systems.</li>
+                </ul>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Common Questions</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li><b>Q:</b> What happens if a process's time quantum expires?<br><b>A:</b> It goes to the back of the queue if not finished.</li>
+                    <li><b>Q:</b> Is RR preemptive?<br><b>A:</b> Yes, the CPU is taken away after the quantum expires.</li>
+                </ul>
+            </div>
+        `,
+        gantt: [
+            {label: 'P1', start: 0, end: 2},
+            {label: 'P2', start: 2, end: 4},
+            {label: 'P3', start: 4, end: 5},
+            {label: 'P1', start: 5, end: 8},
+            {label: 'P2', start: 8, end: 9},
+            {label: 'P1', start: 9, end: 10}
+        ],
+        quiz: [
+            { question: "What is the key feature of RR?", options: ["Time quantum", "Shortest job first", "Priority"], answer: "Time quantum" },
+            { question: "Is RR preemptive?", options: ["Yes", "No"], answer: "Yes" },
+            { question: "What happens when a process's time quantum expires?", options: ["It finishes", "It goes to the back of the queue", "It gets higher priority"], answer: "It goes to the back of the queue" }
+        ]
+    },
+    Priority: {
+        title: "Priority Scheduling",
+        explanation: `
+            <div class="mb-6">
+                <span class="text-2xl font-bold text-blue-300">What is Priority Scheduling?</span>
+                <p class="mt-2 text-gray-100">Priority Scheduling is a CPU scheduling algorithm where each process is assigned a priority. The CPU is always assigned to the process with the highest priority (here, higher number = higher priority). If two processes have the same priority, they are scheduled by arrival order.</p>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Why is it important?</span>
+                <ul class="list-disc ml-6 mt-1 text-gray-100">
+                    <li>Allows important or urgent tasks to be handled first.</li>
+                    <li>Used in real-time and embedded systems where some tasks are more critical.</li>
+                </ul>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">How does it work?</span>
+                <ol class="list-decimal ml-6 mt-1 text-gray-100">
+                    <li>Processes are placed in a queue as they arrive, each with a priority value.</li>
+                    <li>The CPU always picks the process with the highest priority (largest number).</li>
+                    <li>If two have the same priority, the one that arrived first is chosen.</li>
+                </ol>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Real-World Analogy</span>
+                <p class="mt-1 text-gray-100">In a hospital, critical patients (higher priority) are seen first, even if others arrived earlier.</p>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Step-by-Step Example</span>
+                <table class="table-auto w-full text-sm mb-2 mt-2">
+                    <thead><tr class="text-left"><th>Process</th><th>Arrival Time</th><th>Burst Time</th><th>Priority</th></tr></thead>
+                    <tbody>
+                        <tr><td>P1</td><td>0</td><td>4</td><td>2</td></tr>
+                        <tr><td>P2</td><td>1</td><td>3</td><td>1</td></tr>
+                        <tr><td>P3</td><td>2</td><td>1</td><td>3</td></tr>
+                    </tbody>
+                </table>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>P3 (priority 3) runs first, then P1 (2), then P2 (1).</li>
+                </ul>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Interactive Animation</span>
+                <div class="flex flex-col items-center mt-2">
+                    <button id="priority-play-animation" class="mb-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition">Play Animation</button>
+                    <div id="priority-animation-area" class="w-full flex justify-center"></div>
+                </div>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Gantt Chart</span>
+                <div class="flex justify-center"><canvas id="gantt-chart" width="400" height="60"></canvas></div>
+                <div class="text-xs text-gray-400 text-center mt-1">| P3 | P1 | P2 |<br>2&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;7&nbsp;&nbsp;&nbsp;&nbsp;10</div>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-green-400">Advantages</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Handles important tasks first.</li>
+                    <li>Preemptive version is useful for real-time systems.</li>
+                </ul>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-red-400">Disadvantages</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Starvation for low-priority processes (can be solved with aging).</li>
+                </ul>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Where is it used?</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Real-time and embedded systems.</li>
+                </ul>
+            </div>
+            <div class="mb-6">
+                <span class="font-bold text-blue-400">Common Questions</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li><b>Q:</b> Can Priority Scheduling be preemptive?<br><b>A:</b> Yes, the CPU can be taken away if a higher-priority process arrives.</li>
+                    <li><b>Q:</b> How can starvation be prevented?<br><b>A:</b> By using aging (increasing priority of waiting processes).</li>
+                </ul>
+            </div>
+        `,
+        gantt: [
+            {label: 'P3', start: 2, end: 3},
+            {label: 'P1', start: 3, end: 7},
+            {label: 'P2', start: 7, end: 10}
+        ],
+        quiz: [
+            { question: "What does Priority Scheduling rely on?", options: ["Time quantum", "Burst time", "Priority value"], answer: "Priority value" },
+            { question: "Can it lead to starvation?", options: ["Yes", "No"], answer: "Yes" },
+            { question: "How can starvation be prevented?", options: ["Aging", "Lowering burst time", "Increasing quantum"], answer: "Aging" }
+        ]
+    },
+    Deadlock: {
+        title: "Deadlock",
+        explanation: `
+            <div class="mb-4">
+                <span class="text-2xl font-bold text-gray-100">Concept</span>
+                <p class="text-gray-100 mt-2">A deadlock is a situation where a set of processes are blocked because each process is holding a resource and waiting for another resource held by another process in the set.</p>
+            </div>
+            <div class="mb-4">
+                <span class="font-bold text-blue-400">Real-World Analogy</span>
+                <p class="text-gray-100 mt-1">Imagine two cars at a narrow bridge, each waiting for the other to cross first. Neither can proceed, so both are stuck.</p>
+            </div>
+            <div class="mb-4">
+                <span class="font-bold text-blue-400">Necessary Conditions</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Mutual Exclusion</li>
+                    <li>Hold and Wait</li>
+                    <li>No Preemption</li>
+                    <li>Circular Wait</li>
+                </ul>
+            </div>
+            <div class="mb-2">
+                <span class="font-bold text-green-400">Prevention/Recovery</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Deadlock prevention (break one of the conditions)</li>
+                    <li>Deadlock avoidance (Banker's algorithm)</li>
+                    <li>Deadlock detection and recovery</li>
+                </ul>
+            </div>
+        `,
+        quiz: [
+            { question: "Which is NOT a necessary condition for deadlock?", options: ["Mutual Exclusion", "Circular Wait", "Preemption", "Hold and Wait"], answer: "Preemption" },
+            { question: "What is a real-world example of deadlock?", options: ["Two cars at a narrow bridge", "A single car at a stop sign", "A printer queue"], answer: "Two cars at a narrow bridge" }
+        ]
+    },
+    VirtualMemory: {
+        title: "Virtual Memory",
+        explanation: `
+            <div class="mb-4">
+                <span class="text-2xl font-bold text-gray-100">Concept</span>
+                <p class="text-gray-100 mt-2">Virtual memory is a memory management technique that gives an application the impression it has contiguous working memory, while in reality it may be fragmented and even overflow onto disk.</p>
+            </div>
+            <div class="mb-4">
+                <span class="font-bold text-blue-400">Real-World Analogy</span>
+                <p class="text-gray-100 mt-1">Like a desk with limited space: you keep only what you need on the desk, and the rest is in drawers (disk).</p>
+            </div>
+            <div class="mb-4">
+                <span class="font-bold text-blue-400">Benefits</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Allows more processes to run than physical memory would permit</li>
+                    <li>Isolation and protection between processes</li>
+                    <li>Enables large address spaces</li>
+                </ul>
+            </div>
+            <div class="mb-2">
+                <span class="font-bold text-red-400">Drawbacks</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Can cause thrashing if overused</li>
+                    <li>Slower than physical memory</li>
+                </ul>
+            </div>
+        `,
+        quiz: [
+            { question: "What is the main purpose of virtual memory?", options: ["Faster computation", "Larger address space", "More CPU cores"], answer: "Larger address space" },
+            { question: "What is a drawback of virtual memory?", options: ["Thrashing", "Faster access", "No isolation"], answer: "Thrashing" }
+        ]
+    },
+    Semaphores: {
+        title: "Semaphores",
+        explanation: `
+            <div class="mb-4">
+                <span class="text-2xl font-bold text-gray-100">Concept</span>
+                <p class="text-gray-100 mt-2">A semaphore is a synchronization primitive used to control access to a common resource in a concurrent system.</p>
+            </div>
+            <div class="mb-4">
+                <span class="font-bold text-blue-400">Real-World Analogy</span>
+                <p class="text-gray-100 mt-1">A bathroom key in a gas station: only one person can use the bathroom at a time, and the key is the semaphore.</p>
+            </div>
+            <div class="mb-4">
+                <span class="font-bold text-blue-400">Types</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Binary Semaphore (Mutex)</li>
+                    <li>Counting Semaphore</li>
+                </ul>
+            </div>
+            <div class="mb-2">
+                <span class="font-bold text-green-400">Usage</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Prevent race conditions</li>
+                    <li>Implement critical sections</li>
+                </ul>
+            </div>
+        `,
+        quiz: [
+            { question: "What is a semaphore used for?", options: ["CPU scheduling", "Synchronization", "Memory allocation"], answer: "Synchronization" },
+            { question: "What is a binary semaphore also called?", options: ["Mutex", "Counter", "Flag"], answer: "Mutex" }
+        ]
+    },
+    ContextSwitching: {
+        title: "Context Switching",
+        explanation: `
+            <div class="mb-4">
+                <span class="text-2xl font-bold text-gray-100">Concept</span>
+                <p class="text-gray-100 mt-2">Context switching is the process of storing and restoring the state (context) of a CPU so that multiple processes can share a single CPU resource.</p>
+            </div>
+            <div class="mb-4">
+                <span class="font-bold text-blue-400">Real-World Analogy</span>
+                <p class="text-gray-100 mt-1">Like a teacher switching between helping different students, remembering where each left off.</p>
+            </div>
+            <div class="mb-4">
+                <span class="font-bold text-blue-400">Why Important?</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Enables multitasking</li>
+                    <li>Allows fair CPU sharing</li>
+                </ul>
+            </div>
+            <div class="mb-2">
+                <span class="font-bold text-red-400">Drawbacks</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Overhead: takes time to save/restore state</li>
+                    <li>Too frequent switching can reduce performance</li>
+                </ul>
+            </div>
+        `,
+        quiz: [
+            { question: "What does context switching enable?", options: ["Multitasking", "Faster memory", "Deadlock"], answer: "Multitasking" },
+            { question: "What is a drawback of context switching?", options: ["Overhead", "More CPU", "No multitasking"], answer: "Overhead" }
+        ]
+    },
+    Thrashing: {
+        title: "Thrashing",
+        explanation: `
+            <div class="mb-4">
+                <span class="text-2xl font-bold text-gray-100">Concept</span>
+                <p class="text-gray-100 mt-2">Thrashing occurs when a system spends more time swapping pages in and out of memory than executing actual processes, severely degrading performance.</p>
+            </div>
+            <div class="mb-4">
+                <span class="font-bold text-blue-400">Real-World Analogy</span>
+                <p class="text-gray-100 mt-1">Like a worker constantly shuffling papers on a small desk, never getting real work done.</p>
+            </div>
+            <div class="mb-4">
+                <span class="font-bold text-blue-400">Causes</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Too many processes for available memory</li>
+                    <li>Insufficient frames per process</li>
+                </ul>
+            </div>
+            <div class="mb-2">
+                <span class="font-bold text-green-400">Prevention</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Reduce degree of multiprogramming</li>
+                    <li>Use working set model</li>
+                </ul>
+            </div>
+        `,
+        quiz: [
+            { question: "What is thrashing?", options: ["Efficient memory use", "Excessive paging", "CPU scheduling"], answer: "Excessive paging" },
+            { question: "How can thrashing be prevented?", options: ["Increase multiprogramming", "Use working set model", "Decrease frames"], answer: "Use working set model" }
+        ]
+    },
+    FileSystems: {
+        title: "File Systems",
+        explanation: `
+            <div class="mb-4">
+                <span class="text-2xl font-bold text-gray-100">Concept</span>
+                <p class="text-gray-100 mt-2">A file system is a method and data structure that an operating system uses to control how data is stored and retrieved on a disk.</p>
+            </div>
+            <div class="mb-4">
+                <span class="font-bold text-blue-400">Real-World Analogy</span>
+                <p class="text-gray-100 mt-1">Like a library catalog that helps you find and organize books (files) on shelves (disk blocks).</p>
+            </div>
+            <div class="mb-4">
+                <span class="font-bold text-blue-400">Types</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>FAT (File Allocation Table)</li>
+                    <li>NTFS (New Technology File System)</li>
+                    <li>ext3/ext4 (Linux file systems)</li>
+                </ul>
+            </div>
+            <div class="mb-2">
+                <span class="font-bold text-green-400">Functions</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>File creation, deletion, reading, writing</li>
+                    <li>Directory management</li>
+                    <li>Access control and security</li>
+                </ul>
+            </div>
+        `,
+        quiz: [
+            { question: "What is a file system?", options: ["CPU scheduler", "Memory manager", "Data storage method"], answer: "Data storage method" },
+            { question: "Which is a Linux file system?", options: ["NTFS", "ext4", "FAT"], answer: "ext4" }
+        ]
+    },
+    SystemCalls: {
+        title: "System Calls",
+        explanation: `
+            <div class="mb-4">
+                <span class="text-2xl font-bold text-gray-100">Concept</span>
+                <p class="text-gray-100 mt-2">System calls provide the interface between a running program and the operating system, allowing user-level processes to request OS services.</p>
+            </div>
+            <div class="mb-4">
+                <span class="font-bold text-blue-400">Real-World Analogy</span>
+                <p class="text-gray-100 mt-1">Like a customer at a restaurant placing an order (system call) to the kitchen (OS).</p>
+            </div>
+            <div class="mb-4">
+                <span class="font-bold text-blue-400">Examples</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>open(), read(), write(), close()</li>
+                    <li>fork(), exec(), wait(), exit()</li>
+                </ul>
+            </div>
+            <div class="mb-2">
+                <span class="font-bold text-green-400">Categories</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Process control</li>
+                    <li>File management</li>
+                    <li>Device management</li>
+                    <li>Information maintenance</li>
+                    <li>Communication</li>
+                </ul>
+            </div>
+        `,
+        quiz: [
+            { question: "What is a system call?", options: ["A user program", "An OS interface", "A hardware interrupt"], answer: "An OS interface" },
+            { question: "Which is a system call for process control?", options: ["fork()", "read()", "open()"], answer: "fork()" }
+        ]
+    },
+    Starvation: {
+        title: "Starvation",
+        explanation: `
+            <div class="mb-4">
+                <span class="text-2xl font-bold text-gray-100">Concept</span>
+                <p class="text-gray-100 mt-2">Starvation occurs when a process waits indefinitely because other processes are continuously given preference for resources.</p>
+            </div>
+            <div class="mb-4">
+                <span class="font-bold text-blue-400">Real-World Analogy</span>
+                <p class="text-gray-100 mt-1">Like a person at a buffet who never gets food because others keep cutting in line.</p>
+            </div>
+            <div class="mb-4">
+                <span class="font-bold text-blue-400">Causes</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Improper scheduling policies</li>
+                    <li>Continuous arrival of higher-priority processes</li>
+                </ul>
+            </div>
+            <div class="mb-2">
+                <span class="font-bold text-green-400">Prevention</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Use aging (increase priority of waiting processes)</li>
+                    <li>Fair scheduling algorithms</li>
+                </ul>
+            </div>
+        `,
+        quiz: [
+            { question: "What is starvation?", options: ["A process never gets CPU", "A process always runs", "A process is blocked by I/O"], answer: "A process never gets CPU" },
+            { question: "How can starvation be prevented?", options: ["Aging", "FIFO", "Priority scheduling"], answer: "Aging" }
+        ]
+    },
+    CriticalSection: {
+        title: "Critical Section",
+        explanation: `
+            <div class="mb-4">
+                <span class="text-2xl font-bold text-gray-100">Concept</span>
+                <p class="text-gray-100 mt-2">A critical section is a part of a program where shared resources are accessed and which must not be executed by more than one process or thread at a time.</p>
+            </div>
+            <div class="mb-4">
+                <span class="font-bold text-blue-400">Real-World Analogy</span>
+                <p class="text-gray-100 mt-1">Like a single-lane bridge: only one car (process) can cross at a time to avoid collision (data corruption).</p>
+            </div>
+            <div class="mb-4">
+                <span class="font-bold text-blue-400">Requirements</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Mutual Exclusion</li>
+                    <li>Progress</li>
+                    <li>Bounded Waiting</li>
+                </ul>
+            </div>
+            <div class="mb-2">
+                <span class="font-bold text-green-400">Solutions</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Semaphores</li>
+                    <li>Mutexes</li>
+                    <li>Monitors</li>
+                </ul>
+            </div>
+        `,
+        quiz: [
+            { question: "What is a critical section?", options: ["A part of code accessing shared resources", "A scheduling algorithm", "A memory block"], answer: "A part of code accessing shared resources" },
+            { question: "Which is NOT a requirement for critical section?", options: ["Mutual Exclusion", "Progress", "Starvation"], answer: "Starvation" }
+        ]
+    },
+    Paging: {
+        title: "Paging",
+        explanation: `
+            <div class="mb-4">
+                <span class="text-2xl font-bold text-gray-100">Concept</span>
+                <p class="text-gray-100 mt-2">Paging is a memory management scheme that eliminates the need for contiguous allocation of physical memory by dividing memory into fixed-size pages and frames.</p>
+            </div>
+            <div class="mb-4">
+                <span class="font-bold text-blue-400">Real-World Analogy</span>
+                <p class="text-gray-100 mt-1">Like a book split into pages: you can read any page without needing all pages to be together.</p>
+            </div>
+            <div class="mb-4">
+                <span class="font-bold text-blue-400">How it Works</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>Logical memory is divided into pages</li>
+                    <li>Physical memory is divided into frames</li>
+                    <li>Page table maps pages to frames</li>
+                </ul>
+            </div>
+            <div class="mb-2">
+                <span class="font-bold text-green-400">Advantages</span>
+                <ul class="list-disc ml-6 text-gray-100">
+                    <li>No external fragmentation</li>
+                    <li>Efficient memory use</li>
+                </ul>
+            </div>
+        `,
+        quiz: [
+            { question: "What does paging eliminate?", options: ["Internal fragmentation", "External fragmentation", "Thrashing"], answer: "External fragmentation" },
+            { question: "What maps logical pages to physical frames?", options: ["Page table", "Scheduler", "Semaphore"], answer: "Page table" }
+        ]
+    }
+};
+
+const navLinks = document.querySelectorAll(".algo-btn");
+const mainContent = document.getElementById("main-content");
+const progressBar = document.getElementById("progress-bar");
+const progressText = document.getElementById("progress-text");
+const loadingOverlay = document.getElementById("loading-overlay");
+const errorMessage = document.getElementById("error-message");
+const learnRoot = document.getElementById("learn-root");
+const toggleModeBtn = document.getElementById("toggle-mode");
+const modeIcon = document.getElementById("mode-icon");
+const modeLabel = document.getElementById("mode-label");
+let score = 0;
+let completedModules = new Set();
+let darkMode = true;
+
+// --- Load progress from localStorage ---
+function loadProgress() {
+    const saved = localStorage.getItem('learn_completedModules');
+    if (saved) {
+        completedModules = new Set(JSON.parse(saved));
+    }
+}
+function saveProgress() {
+    localStorage.setItem('learn_completedModules', JSON.stringify(Array.from(completedModules)));
+}
+
+// --- Update sidebar for completed modules ---
+function updateSidebarCompletion() {
+    navLinks.forEach(btn => {
+        const mod = btn.dataset.algo;
+        if (completedModules.has(mod)) {
+            btn.classList.add('bg-green-600', 'text-white');
+            btn.innerHTML = btn.innerHTML + ' <span class="ml-auto"><i class="fas fa-check-circle text-green-300"></i></span>';
+        } else {
+            btn.classList.remove('bg-green-600', 'text-white');
+            btn.innerHTML = btn.innerHTML.replace(/<span class=\"ml-auto\">.*?<\/span>/, '');
+        }
+    });
+}
+
+// --- Achievement Modal ---
+function showAchievementModal() {
+    if (document.getElementById('achievement-modal')) return;
+    const modal = document.createElement('div');
+    modal.id = 'achievement-modal';
+    modal.className = 'fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50';
+    modal.innerHTML = `
+        <div class="bg-gray-800 rounded-xl p-8 max-w-md w-full text-center border-4 border-blue-500 shadow-2xl animate-bounceIn">
+            <div class="text-6xl mb-4">🏅</div>
+            <h2 class="text-2xl font-bold text-blue-400 mb-2">Congratulations!</h2>
+            <p class="text-gray-200 mb-4">You have completed all modules in Learn Mode!</p>
+            <button id="close-achievement-modal" class="mt-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg px-6 py-2 font-semibold transition-all duration-300">Close</button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    document.getElementById('close-achievement-modal').onclick = () => modal.remove();
+}
+
+// --- Update Progress Bar and Check for Achievement ---
+function updateProgress() {
+    const progress = (completedModules.size / Object.keys(modules).length) * 100;
+    progressBar.style.width = `${progress}%`;
+    progressText.textContent = `${Math.round(progress)}%`;
+    saveProgress();
+    updateSidebarCompletion();
+    // Show achievement if all modules complete
+    if (completedModules.size === Object.keys(modules).length) {
+        showAchievementModal();
+    }
+}
+
+// --- On load, restore progress ---
+loadProgress();
+updateSidebarCompletion();
+updateProgress();
+
+function showLoading() { loadingOverlay.classList.remove('hidden'); }
+function hideLoading() { loadingOverlay.classList.add('hidden'); }
+function showError(message) {
+    errorMessage.textContent = message;
+    errorMessage.classList.remove('hidden');
+    setTimeout(() => { errorMessage.classList.add('hidden'); }, 5000);
+}
+function handleQuizAnswer(button, correctAnswer) {
+    const isCorrect = button.dataset.answer === correctAnswer;
+    button.classList.add(isCorrect ? 'bg-green-500' : 'bg-red-500');
+    button.classList.add('text-white');
+    button.disabled = true;
+    if (isCorrect) {
+        score += 10;
+        document.getElementById('score').textContent = score;
+    }
+    return isCorrect;
+}
+function drawGantt(canvas, gantt) {
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Dark mode background
+    ctx.fillStyle = darkMode ? '#232336' : '#e5e7eb';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const total = gantt[gantt.length-1].end - gantt[0].start;
+    const width = canvas.width - 40;
+    const height = 30;
+    let x = 20;
+    // Draw Gantt bars
+    gantt.forEach((block, i) => {
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = darkMode ? ['#2563eb','#fbbf24','#22c55e','#f472b6'][i%4] : ['#60a5fa','#fbbf24','#34d399','#f472b6'][i%4];
+        const blockWidth = ((block.end - block.start) / total) * width;
+        ctx.fillRect(x, 15, blockWidth, height);
+        ctx.strokeStyle = darkMode ? '#f3f4f6' : '#374151';
+        ctx.strokeRect(x, 15, blockWidth, height);
+        ctx.fillStyle = darkMode ? '#f3f4f6' : '#1e293b';
+        ctx.font = 'bold 14px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(block.label, x + blockWidth/2, 33);
+        x += blockWidth;
+    });
+
+    // Draw axis line for number line
+    const axisY = 55;
+    ctx.strokeStyle = darkMode ? '#a1a1aa' : '#6b7280';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(20, axisY);
+    ctx.lineTo(canvas.width - 20, axisY);
+    ctx.stroke();
+
+    // Draw ticks and numbers for each unique time (start/end)
+    const timePoints = [];
+    gantt.forEach((block, i) => {
+        if (!timePoints.includes(block.start)) timePoints.push(block.start);
+        if (!timePoints.includes(block.end)) timePoints.push(block.end);
+    });
+    timePoints.sort((a, b) => a - b);
+    timePoints.forEach(time => {
+        const xTick = 20 + ((time - gantt[0].start) / total) * width;
+        // Tick
+        ctx.beginPath();
+        ctx.moveTo(xTick, axisY);
+        ctx.lineTo(xTick, axisY + 7);
+        ctx.strokeStyle = darkMode ? '#a1a1aa' : '#6b7280';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        // Number
+        ctx.font = '12px Arial';
+        ctx.fillStyle = darkMode ? '#a1a1aa' : '#6b7280';
+        ctx.textAlign = 'center';
+        ctx.fillText(time, xTick, axisY + 20);
+    });
+}
+function setMode(dark) {
+    darkMode = dark;
+    if (dark) {
+        learnRoot.classList.add('dark-mode');
+        modeIcon.textContent = '🌙';
+        modeLabel.textContent = 'Dark Mode';
+    } else {
+        learnRoot.classList.remove('dark-mode');
+        modeIcon.textContent = '☀️';
+        modeLabel.textContent = 'Light Mode';
+    }
+    // Redraw Gantt chart if present
+    setTimeout(() => {
+        const canvas = document.getElementById('gantt-chart');
+        if (canvas && window.currentGantt) drawGantt(canvas, window.currentGantt);
+    }, 100);
+}
+toggleModeBtn.addEventListener('click', () => setMode(!darkMode));
+setMode(true); // Default to dark mode
+
+function renderQuiz(module, selected) {
+    const quizDiv = document.getElementById("quiz-section");
+    quizDiv.classList.remove("hidden");
+    let questionIndex = 0;
+    let correctAnswers = 0;
+    let userAnswers = [];
+
+    function showQuestion() {
+        const q = module.quiz[questionIndex];
+        if (!q) {
+            // Quiz complete
+            completedModules.add(selected);
+            updateProgress();
+            const percentage = (correctAnswers / module.quiz.length) * 100;
+            let message = '';
+            if (percentage >= 80) message = 'Excellent! You\'ve mastered this algorithm!';
+            else if (percentage >= 60) message = 'Good job! Keep practicing to improve.';
+            else message = 'Keep studying! You\'ll get better with practice.';
+
+            quizDiv.innerHTML = `
+                <div class="text-center p-6 bg-gray-700 rounded-lg">
+                    <h3 class="text-xl font-bold text-blue-400 mb-2">Quiz Complete!</h3>
+                    <p class="text-lg mb-2">Your score: ${correctAnswers}/${module.quiz.length}</p>
+                    <p class="text-blue-400">${message}</p>
+                    <button class="mt-4 bg-blue-700 text-gray-100 px-4 py-2 rounded hover:bg-blue-500 transition" id="restart-quiz">
+                        Try Again
+                    </button>
+                </div>
+            `;
+            document.getElementById("restart-quiz").onclick = () => renderQuiz(module, selected);
+            return;
+        }
+
+        quizDiv.innerHTML = `
+            <div class="space-y-4">
+                <p class="text-lg font-medium text-gray-100">${q.question}</p>
+                <div class="grid gap-2">
+                    ${q.options.map(opt => `
+                        <button class="opt-btn w-full text-left px-4 py-3 rounded-lg bg-gray-800 hover:bg-gray-700 transition text-gray-100 border border-gray-700"
+                                data-answer="${opt}">
+                            ${opt}
+                        </button>
+                    `).join("")}
+                </div>
+                <div id="quiz-feedback" class="mt-2 text-sm"></div>
+            </div>
+        `;
+
+        document.querySelectorAll(".opt-btn").forEach(btn => {
+            btn.onclick = () => {
+                const selectedAnswer = btn.dataset.answer;
+                const isCorrect = selectedAnswer === q.answer;
+                btn.classList.add(isCorrect ? 'bg-green-500' : 'bg-red-500', 'text-white');
+                btn.disabled = true;
+                document.querySelectorAll(".opt-btn").forEach(b => { if (b !== btn) b.disabled = true; });
+
+                if (isCorrect) {
+                    correctAnswers++;
+                    document.getElementById('score').textContent = correctAnswers * 10;
+                }
+                // Feedback/explanation
+                const feedback = isCorrect
+                    ? `<span class="text-green-400">Correct!</span>`
+                    : `<span class="text-red-400">Incorrect. Correct answer: <span class="text-green-400">${q.answer}</span></span>`;
+                document.getElementById("quiz-feedback").innerHTML = feedback;
+
+                setTimeout(() => {
+                    questionIndex++;
+                    showQuestion();
+                }, 1000);
+            };
+        });
+    }
+
+    showQuestion();
+}
+
+// --- RR Animation ---
+function rrAnimation() {
+    const area = document.getElementById('rr-animation-area');
+    area.innerHTML = '<canvas id="rr-anim-canvas" width="600" height="140"></canvas>';
+    const canvas = document.getElementById('rr-anim-canvas');
+    const ctx = canvas.getContext('2d');
+    // Process data
+    const processes = [
+        { name: 'P1', color: '#2563eb', arrival: 0, burst: 5 },
+        { name: 'P2', color: '#fbbf24', arrival: 1, burst: 3 },
+        { name: 'P3', color: '#22c55e', arrival: 2, burst: 1 }
+    ];
+    const quantum = 2;
+    let queue = [];
+    let completed = [];
+    let time = 0;
+    let step = 0;
+    let running = null;
+    let cpuX = 400;
+    let cpuY = 50;
+    let completedX = 520;
+    let processY = 60;
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Draw queue
+        ctx.font = '16px Arial';
+        ctx.fillStyle = '#a1a1aa';
+        ctx.fillText('Queue', 30, 35);
+        queue.forEach((p, i) => {
+            ctx.fillStyle = p.color;
+            ctx.fillRect(30 + i*60, processY, 50, 40);
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText(p.name, 30 + i*60 + 25, processY+25);
+        });
+        // Draw CPU
+        ctx.fillStyle = '#f472b6';
+        ctx.fillRect(cpuX, cpuY, 60, 40);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 16px Arial';
+        ctx.fillText('CPU', cpuX+30, cpuY+25);
+        // Draw running process
+        if (running) {
+            ctx.fillStyle = running.color;
+            ctx.fillRect(cpuX, cpuY-50, 60, 40);
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText(running.name, cpuX+30, cpuY-25);
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#fbbf24';
+            ctx.fillText('Quantum left: ' + running.quantumLeft, cpuX+5, cpuY-35);
+        }
+        // Draw completed
+        ctx.font = '16px Arial';
+        ctx.fillStyle = '#a1a1aa';
+        ctx.fillText('Completed', completedX, 35);
+        completed.forEach((p, i) => {
+            ctx.fillStyle = p.color;
+            ctx.fillRect(completedX, processY + i*45, 50, 40);
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText(p.name, completedX+25, processY+25 + i*45);
+        });
+        // Draw time
+        ctx.font = 'bold 16px Arial';
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillText('Time: ' + time, 250, 130);
+    }
+    function animate() {
+        // Add processes to queue as they arrive
+        if (step < processes.length && processes[step].arrival <= time) {
+            queue.push({ ...processes[step], remaining: processes[step].burst });
+            step++;
+        }
+        // If CPU is free and queue not empty, pick next
+        if (!running && queue.length > 0) {
+            running = queue.shift();
+            running.quantumLeft = Math.min(quantum, running.remaining);
+        }
+        // Run process in CPU
+        if (running) {
+            running.remaining--;
+            running.quantumLeft--;
+            if (running.remaining === 0) {
+                completed.push(running);
+                running = null;
+            } else if (running.quantumLeft === 0) {
+                queue.push(running);
+                running = null;
+            }
+        }
+        draw();
+        time++;
+        if (completed.length < processes.length) {
+            setTimeout(animate, 900);
+        } else {
+            draw();
+        }
+    }
+    draw();
+    setTimeout(animate, 900);
+}
+function attachRRAnimationButton() {
+    setTimeout(() => {
+        const btn = document.getElementById('rr-play-animation');
+        if (btn) {
+            btn.onclick = rrAnimation;
+        }
+    }, 300);
+}
+navLinks.forEach((btn) => {
+    btn.addEventListener("click", () => {
+        if (btn.dataset.algo === 'RR') {
+            attachRRAnimationButton();
+        }
+    });
+});
+attachRRAnimationButton();
+
+navLinks.forEach((btn) => {
+    btn.addEventListener("click", async () => {
+        try {
+            showLoading();
+            const selected = btn.dataset.algo;
+            const module = modules[selected];
+            if (!module) return;
+            navLinks.forEach(b => b.classList.remove('bg-blue-700', 'bg-blue-500', 'text-white'));
+            btn.classList.add('bg-blue-700', 'text-white');
+            score = 0;
+            document.getElementById('score').textContent = '0';
+            const content = document.createElement('div');
+            content.className = 'p-4 bg-gray-800 rounded shadow transition-opacity duration-300';
+            content.style.opacity = '0';
+            content.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4 text-blue-400">${module.title}</h2>
+                <div class="mb-6">${module.explanation}</div>
+                <button id="start-quiz" class="mt-4 bg-blue-700 text-gray-100 px-4 py-2 rounded hover:bg-blue-500 transition">
+                    Start Quiz
+                </button>
+                <div id="quiz-section" class="mt-6 hidden"></div>
+            `;
+            mainContent.innerHTML = '';
+            mainContent.appendChild(content);
+            setTimeout(() => { content.style.opacity = '1'; }, 10);
+            // Draw Gantt chart if present
+            setTimeout(() => {
+                // Remove any duplicate canvas
+                document.querySelectorAll('#gantt-chart').forEach((el, idx) => { if (idx > 0) el.remove(); });
+                if (module.gantt) {
+                    window.currentGantt = module.gantt;
+                    const canvas = document.getElementById('gantt-chart');
+                    if (canvas) {
+                        drawGantt(canvas, module.gantt);
+                    } else {
+                        console.error('Gantt chart canvas not found!');
+                    }
+                }
+            }, 200);
+            // Quiz
+            setTimeout(() => {
+                const startQuizBtn = document.getElementById("start-quiz");
+                if (startQuizBtn) {
+                    startQuizBtn.onclick = () => renderQuiz(module, selected);
+                }
+            }, 100);
+        } catch (error) {
+            console.error('Error loading module:', error);
+            showError('Failed to load module. Please try again.');
+        } finally {
+            hideLoading();
+        }
+    });
+});
+
+// --- Priority Scheduling Animation ---
+function priorityAnimation() {
+    const area = document.getElementById('priority-animation-area');
+    area.innerHTML = '<canvas id="priority-anim-canvas" width="500" height="120"></canvas>';
+    const canvas = document.getElementById('priority-anim-canvas');
+    const ctx = canvas.getContext('2d');
+    // Process data
+    const processes = [
+        { name: 'P1', color: '#2563eb', arrival: 0, burst: 4, priority: 2 },
+        { name: 'P2', color: '#fbbf24', arrival: 1, burst: 3, priority: 1 },
+        { name: 'P3', color: '#22c55e', arrival: 2, burst: 1, priority: 3 }
+    ];
+    let ready = [];
+    let completed = [];
+    let time = 0;
+    let running = null;
+    let animFrame;
+    let step = 0;
+    let processY = 40;
+    let cpuX = 350;
+    let cpuY = 40;
+    let completedX = 420;
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Draw ready queue
+        ctx.font = '16px Arial';
+        ctx.fillStyle = '#a1a1aa';
+        ctx.fillText('Ready Queue', 30, 25);
+        ready.forEach((p, i) => {
+            ctx.fillStyle = p.color;
+            ctx.fillRect(30 + i*60, processY, 50, 40);
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText(p.name, 30 + i*60 + 25, processY+25);
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#fbbf24';
+            ctx.fillText('Prio: ' + p.priority, 30 + i*60 + 5, processY+38);
+        });
+        // Draw CPU
+        ctx.fillStyle = '#f472b6';
+        ctx.fillRect(cpuX, cpuY, 60, 40);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 16px Arial';
+        ctx.fillText('CPU', cpuX+30, cpuY+25);
+        // Draw running process
+        if (running) {
+            ctx.fillStyle = running.color;
+            ctx.fillRect(cpuX, cpuY-50, 60, 40);
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText(running.name, cpuX+30, cpuY-25);
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#fbbf24';
+            ctx.fillText('Prio: ' + running.priority, cpuX+5, cpuY-10);
+        }
+        // Draw completed
+        ctx.font = '16px Arial';
+        ctx.fillStyle = '#a1a1aa';
+        ctx.fillText('Completed', completedX, 25);
+        completed.forEach((p, i) => {
+            ctx.fillStyle = p.color;
+            ctx.fillRect(completedX, processY + i*45, 50, 40);
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText(p.name, completedX+25, processY+25 + i*45);
+        });
+        // Draw time
+        ctx.font = 'bold 16px Arial';
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillText('Time: ' + time, 200, 110);
+    }
+    function animate() {
+        // Add processes to ready queue as they arrive
+        if (step < processes.length && processes[step].arrival <= time) {
+            ready.push(processes[step]);
+            step++;
+        }
+        // If CPU is free and ready queue not empty, pick highest priority
+        if (!running && ready.length > 0) {
+            ready.sort((a, b) => b.priority - a.priority || a.arrival - b.arrival);
+            running = ready.shift();
+            running.remaining = running.burst;
+        }
+        // Run process in CPU
+        if (running) {
+            running.remaining--;
+            if (running.remaining <= 0) {
+                completed.push(running);
+                running = null;
+            }
+        }
+        draw();
+        time++;
+        if (completed.length < processes.length) {
+            animFrame = setTimeout(animate, 900);
+        } else {
+            draw();
+        }
+    }
+    draw();
+    animFrame = setTimeout(animate, 900);
+}
+function attachPriorityAnimationButton() {
+    setTimeout(() => {
+        const btn = document.getElementById('priority-play-animation');
+        if (btn) {
+            btn.onclick = priorityAnimation;
+        }
+    }, 300);
+}
+navLinks.forEach((btn) => {
+    btn.addEventListener("click", () => {
+        if (btn.dataset.algo === 'Priority') {
+            attachPriorityAnimationButton();
+        }
+    });
+});
+attachPriorityAnimationButton();
+
+// Always re-attach the SJF animation button after module loads
+function attachSJFAnimationButton() {
+    setTimeout(() => {
+        const btn = document.getElementById('sjf-play-animation');
+        if (btn) {
+            btn.onclick = sjfAnimation;
+        }
+    }, 300);
+}
+navLinks.forEach((btn) => {
+    btn.addEventListener("click", () => {
+        if (btn.dataset.algo === 'SJF') {
+            attachSJFAnimationButton();
+        }
+    });
+});
+// Attach on initial load if SJF is default
+attachSJFAnimationButton();
+</script>
+{% endblock %} 

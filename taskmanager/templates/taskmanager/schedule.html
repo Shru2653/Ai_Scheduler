@@ -1,0 +1,680 @@
+{% extends 'taskmanager/base.html' %}
+{% load schedule_filters %}
+{% load static %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6 text-center">Task Scheduler</h1>
+    
+    <div class="space-y-8">
+        <!-- Schedule Parameters -->
+        <div class="bg-[var(--darker-bg)] p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold mb-4 text-center text-[var(--text-color)]">CPU Schedulers</h2>
+            
+            <!-- Display Tasks from Database -->
+            {% if db_tasks %}
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold mb-3 text-[var(--text-color)]">Tasks from Database</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-[var(--dark-bg)] rounded-lg">
+                        <thead>
+                            <tr class="bg-[var(--darker-bg)]">
+                                <th class="px-4 py-2 text-left text-xs font-medium text-[var(--text-color)] uppercase tracking-wider">Title</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-[var(--text-color)] uppercase tracking-wider">Category</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-[var(--text-color)] uppercase tracking-wider">Priority</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-[var(--text-color)] uppercase tracking-wider">Start Time</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-[var(--text-color)] uppercase tracking-wider">End Time</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-[var(--text-color)] uppercase tracking-wider">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[var(--border-color)]">
+                            {% for task in db_tasks %}
+                            <tr class="hover:bg-[var(--hover-color)] transition-colors">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-[var(--text-color)]">{{ task.title }}</td>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-[var(--text-color)]">{{ task.category }}</td>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-[var(--text-color)]">{{ task.priority }}</td>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-[var(--text-color)]">{{ task.start_time|date:"Y-m-d H:i" }}</td>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-[var(--text-color)]">{{ task.end_time|date:"Y-m-d H:i" }}</td>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-[var(--text-color)]">{{ task.status }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+            
+            <form method="POST" class="space-y-4">
+                {% csrf_token %}
+                
+                {% if error %}
+                <div class="bg-red-500 text-white p-4 rounded-lg mb-4">
+                    {{ error }}
+                </div>
+                {% endif %}
+                
+                <div>
+                    <label class="block text-[var(--text-color)] mb-2">Scheduling Algorithm</label>
+                    <select name="algorithm" id="algorithm-select" class="w-full p-2 rounded bg-[var(--dark-bg)] text-[var(--text-color)] border border-[var(--border-color)] focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)]">
+                        <option value="round_robin">Round Robin</option>
+                        <option value="priority">Priority Scheduling</option>
+                        <option value="ai">AI-Based Prioritization</option>
+                        <option value="mlfq">Multilevel Feedback Queue</option>
+                        <option value="deadline">Deadline Scheduling</option>
+                        <option value="fcfs">First Come First Serve</option>
+                        <option value="sjf">Shortest Job First</option>
+                    </select>
+                </div>
+
+                <div id="recommendation-container" class="mt-4 p-4 bg-[var(--darker-bg)] rounded-lg border border-[var(--border-color)] hidden">
+                    <h3 class="text-lg font-semibold text-[var(--text-color)] mb-2">Recommended Algorithm</h3>
+                    <p id="recommendation-text" class="text-[var(--text-color)]"></p>
+                </div>
+
+                <button type="button" id="recommend-btn" class="w-full p-2 bg-[var(--primary-color)] text-white rounded hover:bg-[var(--primary-color-dark)] transition-colors">
+                    Recommend Best Algorithm
+                </button>
+
+                <div id="time-quantum-container">
+                    <label class="block text-[var(--text-color)] mb-2">Time Quantum (for Round Robin and MLFQ)</label>
+                    <input type="number" name="time_quantum" value="2" min="1" class="w-full p-2 rounded bg-[var(--dark-bg)] text-[var(--text-color)] border border-[var(--border-color)] focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)]">
+                </div>
+
+                <div id="processes-container" class="space-y-4">
+                    <div class="process-entry p-4 bg-[var(--dark-bg)] rounded-lg border border-[var(--border-color)]">
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                            <div>
+                                <label class="block text-[var(--text-color)] mb-2">Process Name</label>
+                                <input type="text" name="process_name[]" required class="w-full p-2 rounded bg-[var(--darker-bg)] text-[var(--text-color)] border border-[var(--border-color)] focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)]">
+                            </div>
+                            <div>
+                                <label class="block text-[var(--text-color)] mb-2">Arrival Time</label>
+                                <input type="number" name="arrival_time[]" required min="0" class="w-full p-2 rounded bg-[var(--darker-bg)] text-[var(--text-color)] border border-[var(--border-color)] focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)]">
+                            </div>
+                            <div>
+                                <label class="block text-[var(--text-color)] mb-2">Burst Time</label>
+                                <input type="number" name="burst_time[]" required min="1" class="w-full p-2 rounded bg-[var(--darker-bg)] text-[var(--text-color)] border border-[var(--border-color)] focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)]">
+                            </div>
+                            <div class="priority-input" style="display: none;">
+                                <label class="block text-[var(--text-color)] mb-2">Priority</label>
+                                <input type="number" name="priority[]" min="1" class="w-full p-2 rounded bg-[var(--darker-bg)] text-[var(--text-color)] border border-[var(--border-color)] focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)]">
+                            </div>
+                            <div class="deadline-input" style="display: none;">
+                                <label class="block text-[var(--text-color)] mb-2">Deadline</label>
+                                <input type="number" name="deadline[]" min="1" class="w-full p-2 rounded bg-[var(--darker-bg)] text-[var(--text-color)] border border-[var(--border-color)] focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)]">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between mt-6">
+                    <button type="button" id="add-process" class="px-4 py-2 text-white rounded hover:bg-[var(--hover-color)] transition-colors" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
+                        Add Process
+                    </button>
+                    <button type="submit" class="px-6 py-2 text-white rounded hover:bg-[var(--hover-color)] transition-colors" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
+                        Generate Schedule
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Schedule Results -->
+        {% if result %}
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg mt-8">
+            <h2 class="text-2xl font-semibold mb-4 text-center">Schedule Results</h2>
+            
+            <!-- Gantt Chart -->
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4">Gantt Chart</h3>
+                <div class="gantt-container overflow-x-auto">
+                    <div class="gantt-chart bg-gray-700 p-6 rounded-lg shadow-lg min-w-max">
+                        <!-- Timeline -->
+                        <div class="timeline-container mb-6">
+                            <div class="flex">
+                                {% with max_time=result.gantt|last %}
+                                {% for i in "x"|ljust:max_time.end %}
+                                <div class="timeline-unit {% if forloop.counter0|divisibleby:5 %}major-unit{% endif %}">
+                                    <div class="timeline-marker"></div>
+                                    <div class="timeline-label">{{ forloop.counter0 }}</div>
+                                </div>
+                                {% endfor %}
+                                {% endwith %}
+                            </div>
+                        </div>
+
+                        <!-- Process Bars -->
+                        <div class="process-bars">
+                            {% for item in result.gantt %}
+                            <div class="process-row">
+                                <div class="process-name">{{ item.process }}</div>
+                                <div class="process-timeline">
+                                    {% with max_time=result.gantt|last %}
+                                    {% for i in "x"|ljust:max_time.end %}
+                                    <div class="timeline-cell {% if forloop.counter0 >= item.start and forloop.counter0 < item.end %}active{% endif %}">
+                                        {% if forloop.counter0 == item.start %}
+                                        <div class="process-bar" 
+                                             data-process="{{ item.process }}"
+                                             data-start="{{ item.start }}"
+                                             data-end="{{ item.end }}">
+                                            <div class="process-bar-content">
+                                                <span class="process-time">{{ item.start }}-{{ item.end }}</span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                    {% endwith %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metrics Table -->
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4">Process Metrics</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-gray-700 rounded-lg">
+                        <thead>
+                            <tr class="bg-gray-800">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Process</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Completion Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Turnaround Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Waiting Time</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-600">
+                            {% for metric in result.metrics %}
+                            <tr class="hover:bg-gray-600 transition-colors">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{{ metric.process }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{{ metric.ct }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{{ metric.tat }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{{ metric.wt }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Summary Statistics -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <p class="text-gray-400">Average Turnaround Time</p>
+                    <p class="text-2xl font-bold text-green-400">{{ avg_tat|default:0|floatformat:2 }}</p>
+                </div>
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <p class="text-gray-400">Average Waiting Time</p>
+                    <p class="text-2xl font-bold text-green-400">{{ avg_wt|default:0|floatformat:2 }}</p>
+                </div>
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <p class="text-gray-400">CPU Utilization</p>
+                    <p class="text-2xl font-bold text-green-400">{{ cpu_utilization|default:0|floatformat:2 }}%</p>
+                </div>
+            </div>
+
+            <!-- Time Quantum Recommendation (for Round Robin/MLFQ) -->
+            {% if time_quantum_recommendation %}
+            <div class="mt-8">
+                <div class="p-4 bg-blue-900 text-white rounded-lg">
+                    <h4 class="font-bold text-lg mb-2">Recommended Time Quantum</h4>
+                    <div class="space-y-1">
+                        <div><span class="font-semibold">Recommended:</span> {{ time_quantum_recommendation.optimal_time_quantum }}</div>
+                        <div><span class="font-semibold">Your Input:</span> {{ time_quantum_recommendation.user_time_quantum }}</div>
+                        <div><span class="font-semibold">Recommended Throughput:</span> {{ time_quantum_recommendation.throughput }}</div>
+                        <div><span class="font-semibold">User Throughput:</span> {{ time_quantum_recommendation.user_throughput }}</div>
+                    </div>
+                    {% if not time_quantum_recommendation.optimal_time_quantum %}
+                    <div class="text-red-400">No recommendation available.</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+{% endif %}
+
+        <!-- Disk Scheduling Section -->
+        <div class="bg-[var(--darker-bg)] p-6 rounded-lg shadow-lg mt-12">
+            <h2 class="text-2xl font-semibold mb-4 text-center text-[var(--text-color)]">Disk Scheduling Algorithms</h2>
+            <form method="POST" action="{% url 'taskmanager:disk_schedule' %}" class="space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-[var(--text-color)] mb-2">Algorithm</label>
+                    <select name="disk_algorithm" class="w-full p-2 rounded bg-[var(--dark-bg)] text-[var(--text-color)]">
+                        <option value="fcfs">FCFS</option>
+                        <option value="sstf">SSTF</option>
+                        <option value="scan">SCAN</option>
+                        <option value="cscan">C-SCAN</option>
+                        <option value="look">LOOK</option>
+                        <option value="clook">C-LOOK</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[var(--text-color)] mb-2">Request Sequence (comma separated)</label>
+                    <input type="text" name="requests" class="w-full p-2 rounded bg-[var(--dark-bg)] text-[var(--text-color)]" placeholder="e.g. 98,183,37,122,14,124,65,67">
+                </div>
+                <div>
+                    <label class="block text-[var(--text-color)] mb-2">Initial Head Position</label>
+                    <input type="number" name="head" class="w-full p-2 rounded bg-[var(--dark-bg)] text-[var(--text-color)]">
+                </div>
+                <button type="submit" class="px-6 py-2 text-white rounded" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
+                    Run Disk Scheduler
+                </button>
+            </form>
+            <!-- Disk Scheduling Results -->
+            {% if disk_result %}
+            <div class="bg-[var(--darker-bg)] p-6 rounded-lg shadow-lg mt-8">
+                <h2 class="text-2xl font-semibold mb-4 text-center text-[var(--text-color)]">Disk Scheduling Results</h2>
+                
+                <!-- Visualization -->
+                <div class="mb-6">
+                    {{ disk_result.visualization|safe }}
+                </div>
+                
+                <!-- Metrics -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-[var(--dark-bg)] p-4 rounded-lg">
+                        <p class="text-[var(--text-color)]">Total Head Movement</p>
+                        <p class="text-2xl font-bold text-green-400">{{ disk_result.total_movement }} tracks</p>
+                    </div>
+                    <div class="bg-[var(--dark-bg)] p-4 rounded-lg">
+                        <p class="text-[var(--text-color)]">Access Sequence</p>
+                        <p class="text-lg text-blue-400">{{ disk_result.sequence|join:" → " }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Paging Section -->
+        <div class="bg-[var(--darker-bg)] p-6 rounded-lg shadow-lg mt-12">
+            <h2 class="text-2xl font-semibold mb-4 text-center text-[var(--text-color)]">Paging Algorithms</h2>
+            <form method="POST" action="{% url 'taskmanager:paging' %}" class="space-y-4" id="pagingForm">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-[var(--text-color)] mb-2">Algorithm</label>
+                    <select name="paging_algorithm" class="w-full p-2 rounded bg-[var(--dark-bg)] text-[var(--text-color)]">
+                        <option value="fifo">FIFO</option>
+                        <option value="lru">LRU</option>
+                        <option value="optimal">Optimal</option>
+                        <option value="second_chance">Second Chance</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[var(--text-color)] mb-2">Reference String (comma separated)</label>
+                    <input type="text" name="reference_string" class="w-full p-2 rounded bg-[var(--dark-bg)] text-[var(--text-color)]" placeholder="e.g. 7,0,1,2,0,3,0,4,2,3,0,3,2">
+                </div>
+                <div>
+                    <label class="block text-[var(--text-color)] mb-2">Number of Frames</label>
+                    <input type="number" name="frames" class="w-full p-2 rounded bg-[var(--dark-bg)] text-[var(--text-color)]" min="1" max="10" value="3">
+                </div>
+                <button type="submit" class="px-6 py-2 text-white rounded" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
+                    Run Paging Algorithm
+                </button>
+            </form>
+            <!-- Animated Line Graph GIF Visualization -->
+            <div class="mt-6 text-center" id="pagingGifContainer">
+                {% if paging_gif_data %}
+                <img src="data:image/gif;base64,{{ paging_gif_data }}" alt="Animated Line Graph" style="display:inline-block;max-width:100%;border:2px solid #888;border-radius:8px;background:#181830;"/>
+                {% endif %}
+            </div>
+            <div class="mt-4 text-center text-lg font-semibold text-[var(--text-color)]" id="pagingResults">
+                {% if total_faults is not None and total_hits is not None %}
+                    Total Page Faults: <span class="text-red-400">{{ total_faults }}</span> &nbsp;|&nbsp; Total Page Hits: <span class="text-green-400">{{ total_hits }}</span>
+                {% endif %}
+            </div>
+            <div class="mt-2 text-center text-[var(--text-color)] text-sm italic">Animated Reference String Traversal</div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .gantt-container {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.1);
+    }
+
+    .gantt-container::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .gantt-container::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+    }
+
+    .gantt-container::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+    }
+
+    .gantt-chart {
+        position: relative;
+        min-height: 300px;
+        background: #1a1a2e;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        min-width: max-content;
+    }
+
+    .timeline-container {
+        position: sticky;
+        top: 0;
+        background: rgba(255, 255, 255, 0.05);
+        z-index: 2;
+        padding-bottom: 16px;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        margin-bottom: 24px;
+        min-width: max-content;
+    }
+
+    .timeline-unit {
+        position: relative;
+        min-width: 50px;
+        height: 40px;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .major-unit {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .timeline-marker {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 2px;
+        height: 12px;
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .timeline-label {
+        position: absolute;
+        bottom: -24px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .process-bars {
+        margin-top: 40px;
+        min-width: max-content;
+    }
+
+    .process-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 8px;
+        padding: 0 16px;
+        min-width: max-content;
+    }
+
+    .process-name {
+        width: 120px;
+        padding-right: 16px;
+        font-weight: 600;
+        font-size: 1.125rem;
+        color: rgba(255, 255, 255, 0.9);
+        position: sticky;
+        left: 0;
+        z-index: 1;
+    }
+
+    .process-timeline {
+        flex: 1;
+        display: flex;
+        position: relative;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 6px;
+        min-width: max-content;
+    }
+
+    .timeline-cell {
+        min-width: 50px;
+        height: 100%;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        position: relative;
+    }
+
+    .process-bar {
+        position: absolute;
+        height: 40px;
+        top: 10px;
+        left: 0;
+        background: linear-gradient(135deg, #4CAF50, #8BC34A);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .process-bar-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        padding: 0 12px;
+    }
+
+    .process-time {
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    .process-bar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+</style>
+
+<script>
+document.getElementById('add-process').addEventListener('click', function() {
+    const container = document.getElementById('processes-container');
+    const template = container.firstElementChild.cloneNode(true);
+    
+    // Clear input values
+    template.querySelectorAll('input').forEach(input => {
+        input.value = '';
+    });
+    
+    container.appendChild(template);
+});
+
+// Function to toggle input visibility based on selected algorithm
+function toggleInputs() {
+    const algorithm = document.getElementById('algorithm-select').value;
+    const priorityInputs = document.querySelectorAll('.priority-input');
+    const deadlineInputs = document.querySelectorAll('.deadline-input');
+    const timeQuantumContainer = document.getElementById('time-quantum-container');
+    
+    // Handle priority inputs
+    if (algorithm === 'priority' || algorithm === 'ai') {
+        // Show priority inputs for Priority Scheduling and AI-Based Prioritization
+        priorityInputs.forEach(input => {
+            input.style.display = 'block';
+            const priorityField = input.querySelector('input[name="priority[]"]');
+            if (priorityField) {
+                priorityField.setAttribute('required', 'required');
+            }
+        });
+    } else {
+        // Hide priority inputs for other algorithms
+        priorityInputs.forEach(input => {
+            input.style.display = 'none';
+            const priorityField = input.querySelector('input[name="priority[]"]');
+            if (priorityField) {
+                priorityField.removeAttribute('required');
+            }
+        });
+    }
+    
+    // Handle deadline inputs
+    if (algorithm === 'deadline') {
+        // Show deadline inputs for Deadline Scheduling
+        deadlineInputs.forEach(input => {
+            input.style.display = 'block';
+            const deadlineField = input.querySelector('input[name="deadline[]"]');
+            if (deadlineField) {
+                deadlineField.setAttribute('required', 'required');
+            }
+        });
+    } else {
+        // Hide deadline inputs for other algorithms
+        deadlineInputs.forEach(input => {
+            input.style.display = 'none';
+            const deadlineField = input.querySelector('input[name="deadline[]"]');
+            if (deadlineField) {
+                deadlineField.removeAttribute('required');
+            }
+        });
+    }
+    
+    // Handle time quantum input
+    if (algorithm === 'round_robin' || algorithm === 'mlfq') {
+        timeQuantumContainer.style.display = 'block';
+    } else {
+        timeQuantumContainer.style.display = 'none';
+    }
+}
+
+// Initialize input visibility on page load
+document.addEventListener('DOMContentLoaded', function() {
+    toggleInputs();
+    
+    // Add event listener to algorithm select
+    document.getElementById('algorithm-select').addEventListener('change', toggleInputs);
+    
+    // Set different colors for each process and calculate widths
+    const processBars = document.querySelectorAll('.process-bar');
+    const colors = [
+        'linear-gradient(135deg, #4CAF50, #8BC34A)',
+        'linear-gradient(135deg, #2196F3, #03A9F4)',
+        'linear-gradient(135deg, #FF9800, #FFC107)',
+        'linear-gradient(135deg, #E91E63, #F06292)',
+        'linear-gradient(135deg, #9C27B0, #BA68C8)',
+        'linear-gradient(135deg, #3F51B5, #7986CB)',
+        'linear-gradient(135deg, #00BCD4, #4DD0E1)',
+        'linear-gradient(135deg, #FF5722, #FF8A65)'
+    ];
+
+    processBars.forEach((bar, index) => {
+        // Set color
+        bar.style.background = colors[index % colors.length];
+        
+        // Calculate and set width based on start and end times
+        const start = parseInt(bar.dataset.start);
+        const end = parseInt(bar.dataset.end);
+        const duration = end - start;
+        const cellWidth = 50; // Reduced width of each time unit in pixels
+        bar.style.width = `${duration * cellWidth}px`;
+    });
+});
+
+// Paging AJAX for animated GIF
+const pagingForm = document.getElementById('pagingForm');
+if (pagingForm) {
+    pagingForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(pagingForm);
+        fetch(pagingForm.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.gif_data) {
+                document.getElementById('pagingGifContainer').innerHTML = `<img src="data:image/gif;base64,${data.gif_data}" alt="Animated Line Graph" style="display:inline-block;max-width:100%;border:2px solid #888;border-radius:8px;background:#181830;"/>`;
+            }
+            if (typeof data.total_faults !== 'undefined' && typeof data.total_hits !== 'undefined') {
+                document.getElementById('pagingResults').innerHTML = `Total Page Faults: <span class='text-red-400'>${data.total_faults}</span> &nbsp;|&nbsp; Total Page Hits: <span class='text-green-400'>${data.total_hits}</span>`;
+            }
+            if (data.error) {
+                document.getElementById('pagingGifContainer').innerHTML = `<div class='text-red-500'>${data.error}</div>`;
+                document.getElementById('pagingResults').innerHTML = '';
+            }
+        })
+        .catch(err => {
+            document.getElementById('pagingGifContainer').innerHTML = `<div class='text-red-500'>Error: ${err}</div>`;
+        });
+    });
+}
+
+document.getElementById('recommend-btn').addEventListener('click', function() {
+    const processEntries = document.querySelectorAll('.process-entry');
+    const formData = new FormData();
+    
+    processEntries.forEach(entry => {
+        const name = entry.querySelector('input[name="process_name[]"]').value;
+        const arrival = entry.querySelector('input[name="arrival_time[]"]').value;
+        const burst = entry.querySelector('input[name="burst_time[]"]').value;
+        
+        if (name && arrival && burst) {
+            formData.append('process_name[]', name);
+            formData.append('arrival_time[]', arrival);
+            formData.append('burst_time[]', burst);
+        }
+    });
+    
+    fetch('{% url "taskmanager:get_algorithm_recommendation" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const container = document.getElementById('recommendation-container');
+        const text = document.getElementById('recommendation-text');
+        
+        if (data.error) {
+            text.textContent = data.error;
+            container.classList.remove('hidden');
+        } else {
+            text.textContent = `Recommended Algorithm: ${data.algorithm.toUpperCase()} - ${data.explanation}`;
+            container.classList.remove('hidden');
+            
+            // Update the algorithm select dropdown
+            const select = document.getElementById('algorithm-select');
+            select.value = data.algorithm;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        const container = document.getElementById('recommendation-container');
+        const text = document.getElementById('recommendation-text');
+        text.textContent = 'An error occurred while getting the recommendation';
+        container.classList.remove('hidden');
+    });
+});
+</script>
+
+{% block extra_js %}
+<script src="{% static 'js/paging_simulation.js' %}"></script>
+{% endblock %}
+{% endblock %}

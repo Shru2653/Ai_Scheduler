@@ -1,0 +1,253 @@
+{% extends 'taskmanager/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6 text-center text-[var(--text-color)]">Page Replacement Algorithm Visualizer</h1>
+    
+    <div class="bg-[var(--darker-bg)] p-6 rounded-lg shadow-lg">
+        <form id="pageReplacementForm" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-[var(--text-color)] mb-2">Algorithm</label>
+                <select name="paging_algorithm" class="w-full p-2 rounded bg-[var(--dark-bg)] text-[var(--text-color)]">
+                    <option value="fifo">FIFO</option>
+                    <option value="lru">LRU</option>
+                    <option value="optimal">Optimal</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-[var(--text-color)] mb-2">Reference String (comma separated)</label>
+                <input type="text" name="reference_string" class="w-full p-2 rounded bg-[var(--dark-bg)] text-[var(--text-color)]" 
+                       placeholder="e.g. 7,0,1,2,0,3,0,4,2,3,0,3,2">
+            </div>
+            <div>
+                <label class="block text-[var(--text-color)] mb-2">Number of Frames</label>
+                <input type="number" name="frames" class="w-full p-2 rounded bg-[var(--dark-bg)] text-[var(--text-color)]" 
+                       min="1" max="10" value="3">
+            </div>
+            <button type="submit" class="px-6 py-2 text-white rounded hover:bg-[var(--hover-color)] transition-colors" 
+                    style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
+                Start Visualization
+            </button>
+        </form>
+        
+        <!-- Visualization Container -->
+        <div class="mt-8">
+            <div id="visualization" class="w-full h-[600px] bg-[var(--dark-bg)] rounded-lg"></div>
+            
+            <!-- Controls -->
+            <div class="mt-4 flex justify-center space-x-4">
+                <button id="playPauseBtn" class="px-4 py-2 bg-[var(--primary-color)] text-white rounded disabled:opacity-50">
+                    Play
+                </button>
+                <button id="stepBtn" class="px-4 py-2 bg-[var(--primary-color)] text-white rounded">
+                    Step
+                </button>
+                <button id="resetBtn" class="px-4 py-2 bg-[var(--primary-color)] text-white rounded">
+                    Reset
+                </button>
+            </div>
+            
+            <!-- Stats -->
+            <div class="mt-4 text-center text-[var(--text-color)]">
+                <p>Total Page Faults: <span id="totalFaults">0</span></p>
+                <p>Current Step: <span id="currentStep">0</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- D3.js -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+
+<script>
+let simulationData = null;
+let currentStepIndex = 0;
+let isPlaying = false;
+let animationInterval = null;
+
+const width = 700;
+const height = 350;
+const nodeRadius = 22;
+const nodeSpacing = 70;
+const yBase = 120;
+const xBase = 60;
+
+const svg = d3.select('#visualization')
+    .append('svg')
+    .attr('width', width)
+    .attr('height', height);
+
+function getNodePosition(i) {
+    // Diagonal layout
+    return [xBase + i * nodeSpacing, yBase + i * 30];
+}
+
+function drawGraph() {
+    svg.selectAll('*').remove();
+    if (!simulationData) return;
+
+    const steps = simulationData.history;
+    const n = steps.length;
+
+    // Draw lines (edges) up to current step
+    for (let i = 1; i <= currentStepIndex; i++) {
+        const [x1, y1] = getNodePosition(i - 1);
+        const [x2, y2] = getNodePosition(i);
+        svg.append('line')
+            .attr('x1', x1)
+            .attr('y1', y1)
+            .attr('x2', x2)
+            .attr('y2', y2)
+            .attr('stroke', steps[i].fault ? '#f44336' : '#4CAF50')
+            .attr('stroke-width', 4)
+            .attr('opacity', 0.8)
+            .attr('marker-end', 'url(#arrow)');
+    }
+
+    // Add arrow marker
+    svg.append('defs').append('marker')
+        .attr('id', 'arrow')
+        .attr('viewBox', '0 0 10 10')
+        .attr('refX', 8)
+        .attr('refY', 5)
+        .attr('markerWidth', 6)
+        .attr('markerHeight', 6)
+        .attr('orient', 'auto')
+        .append('path')
+        .attr('d', 'M 0 0 L 10 5 L 0 10 z')
+        .attr('fill', '#333');
+
+    // Draw nodes
+    for (let i = 0; i < n; i++) {
+        const [x, y] = getNodePosition(i);
+
+        // Node color logic
+        let fill = '#444';
+        let stroke = '#aaa';
+        let strokeWidth = 3;
+        if (i < currentStepIndex) {
+            fill = steps[i].fault ? '#f44336' : '#4CAF50';
+            stroke = '#222';
+        }
+        if (i === currentStepIndex) {
+            fill = '#2196F3';
+            stroke = '#1976D2';
+            strokeWidth = 5;
+        }
+
+        svg.append('circle')
+            .attr('cx', x)
+            .attr('cy', y)
+            .attr('r', nodeRadius)
+            .attr('fill', fill)
+            .attr('stroke', stroke)
+            .attr('stroke-width', strokeWidth);
+
+        svg.append('text')
+            .attr('x', x)
+            .attr('y', y + 7)
+            .attr('text-anchor', 'middle')
+            .attr('font-size', 20)
+            .attr('font-weight', 'bold')
+            .attr('fill', '#fff')
+            .text(steps[i].page);
+    }
+}
+
+function animateStep() {
+    if (!simulationData) return;
+    if (currentStepIndex < simulationData.history.length - 1) {
+        currentStepIndex++;
+        drawGraph();
+        updateStats();
+    } else {
+        isPlaying = false;
+        document.getElementById('playPauseBtn').disabled = false;
+        document.getElementById('playPauseBtn').textContent = 'Play';
+        clearInterval(animationInterval);
+    }
+}
+
+function resetSimulation() {
+    currentStepIndex = 0;
+    isPlaying = false;
+    if (animationInterval) clearInterval(animationInterval);
+    document.getElementById('playPauseBtn').textContent = 'Play';
+    document.getElementById('playPauseBtn').disabled = false;
+    drawGraph();
+    updateStats();
+}
+
+function updateStats() {
+    document.getElementById('totalFaults').textContent = simulationData ? simulationData.total_faults : 0;
+    document.getElementById('currentStep').textContent = currentStepIndex + 1;
+}
+
+// AJAX form handler
+document.getElementById('pageReplacementForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    try {
+        const response = await fetch('/page-replacement/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        });
+        if (!response.ok) throw new Error('Network response was not ok');
+        simulationData = await response.json();
+        resetSimulation();
+    } catch (error) {
+        alert('Error running simulation: ' + error.message);
+    }
+});
+
+// Controls
+document.getElementById('playPauseBtn').addEventListener('click', () => {
+    if (!simulationData) return;
+    isPlaying = !isPlaying;
+    document.getElementById('playPauseBtn').textContent = isPlaying ? 'Pause' : 'Play';
+    if (isPlaying) {
+        animationInterval = setInterval(animateStep, 900);
+        document.getElementById('playPauseBtn').disabled = true;
+        setTimeout(() => document.getElementById('playPauseBtn').disabled = false, 900);
+    } else {
+        clearInterval(animationInterval);
+    }
+});
+document.getElementById('stepBtn').addEventListener('click', animateStep);
+document.getElementById('resetBtn').addEventListener('click', resetSimulation);
+
+</script>
+
+<style>
+.node circle {
+    stroke: #fff;
+    stroke-width: 2px;
+}
+
+.node text {
+    font-size: 16px;
+    font-weight: bold;
+    fill: #fff;
+}
+
+.links line {
+    stroke-opacity: 0.6;
+}
+
+.node:hover {
+    cursor: pointer;
+}
+</style>
+
+<!-- Legend -->
+<div class="mt-4 flex justify-center gap-6">
+    <span style="color:#4CAF50;font-weight:bold;">● In Memory (Hit)</span>
+    <span style="color:#f44336;font-weight:bold;">● Page Fault</span>
+    <span style="color:#2196F3;font-weight:bold;">● Current Reference</span>
+</div>
+{% endblock %} 

@@ -1,0 +1,358 @@
+{% extends 'taskmanager/base.html' %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6 text-center">Schedule Visualization</h1>
+    
+    <div class="space-y-8">
+        <!-- Gantt Chart -->
+        <div class="bg-[var(--darker-bg)] p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold mb-4 text-center text-[var(--text-color)]">Gantt Chart</h2>
+            <div class="gantt-container">
+                <div class="timeline">
+                    {% for process_name, completion_time in result %}
+                        {% if not forloop.first %}
+                            {% with prev_time=result|get_item:forloop.counter0|get_item:1 %}
+                                <div class="process-block" data-left="{{ prev_time }}" data-width="{{ completion_time|subtract:prev_time }}">
+                                    {{ process_name }}
+                                </div>
+                            {% endwith %}
+                        {% else %}
+                            <div class="process-block process-block-start" data-width="{{ completion_time }}">
+                                {{ process_name }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Metrics Table -->
+        <div class="bg-[var(--darker-bg)] p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold mb-4 text-center text-[var(--text-color)]">Process Metrics</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-[var(--dark-bg)] rounded-lg">
+                    <thead>
+                        <tr class="bg-[var(--darker-bg)]">
+                            <th class="px-4 py-2 text-left text-xs font-medium text-[var(--text-color)] uppercase tracking-wider">Process</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-[var(--text-color)] uppercase tracking-wider">Arrival Time</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-[var(--text-color)] uppercase tracking-wider">Burst Time</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-[var(--text-color)] uppercase tracking-wider">Priority</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-[var(--text-color)] uppercase tracking-wider">Completion Time</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-[var(--text-color)] uppercase tracking-wider">Turnaround Time</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-[var(--text-color)] uppercase tracking-wider">Waiting Time</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[var(--border-color)]">
+                        {% for process in processes %}
+                        <tr class="hover:bg-[var(--hover-color)] transition-colors">
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-[var(--text-color)]">{{ process.process_name }}</td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-[var(--text-color)]">{{ process.arrival_time }}</td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-[var(--text-color)]">{{ process.burst_time }}</td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-[var(--text-color)]">{{ process.priority }}</td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-[var(--text-color)]">{{ process.completion_time }}</td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-[var(--text-color)]">{{ process.turnaround_time }}</td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-[var(--text-color)]">{{ process.waiting_time }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="bg-[var(--darker-bg)] p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold mb-4 text-center text-[var(--text-color)]">Performance Metrics</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-[var(--dark-bg)] p-4 rounded-lg">
+                    <p class="text-[var(--text-color)]">Average Turnaround Time</p>
+                    <p class="text-2xl font-bold text-green-400">{{ avg_turnaround_time|floatformat:2 }}</p>
+                </div>
+                <div class="bg-[var(--dark-bg)] p-4 rounded-lg">
+                    <p class="text-[var(--text-color)]">Average Waiting Time</p>
+                    <p class="text-2xl font-bold text-green-400">{{ avg_waiting_time|floatformat:2 }}</p>
+                </div>
+                <div class="bg-[var(--dark-bg)] p-4 rounded-lg">
+                    <p class="text-[var(--text-color)]">CPU Utilization</p>
+                    <p class="text-2xl font-bold text-green-400">{{ cpu_utilization|floatformat:2 }}%</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Animation Section -->
+        <div class="bg-[var(--darker-bg)] p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold mb-4 text-center text-[var(--text-color)]">Step-by-Step Animation</h2>
+            <div class="animation-controls">
+                <button id="prevStep" class="animation-button" disabled>Previous</button>
+                <button id="playPause" class="animation-button">Play</button>
+                <button id="nextStep" class="animation-button">Next</button>
+                <button id="resetAnimation" class="animation-button">Reset</button>
+            </div>
+            <div id="stepsContainer"></div>
+        </div>
+
+        <div class="flex justify-center mt-6">
+            <a href="{% url 'input_processes' %}" class="px-6 py-2 text-white rounded hover:bg-[var(--hover-color)] transition-colors" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
+                Add More Processes
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .gantt-container {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.1);
+    }
+
+    .gantt-container::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .gantt-container::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+    }
+
+    .gantt-container::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+    }
+
+    .timeline {
+        position: relative;
+        height: 30px;
+        background: rgba(255, 255, 255, 0.05);
+        margin: 5px 0;
+        border-radius: 4px;
+    }
+
+    .process-block {
+        position: absolute;
+        height: 100%;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        text-align: center;
+        line-height: 30px;
+        font-size: 12px;
+        border-radius: 4px;
+    }
+
+    .process-block-start {
+        left: 0;
+    }
+
+    .animation-container {
+        margin: 20px 0;
+    }
+    
+    .step-container {
+        margin: 10px 0;
+        padding: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 5px;
+        background: rgba(255, 255, 255, 0.05);
+        display: none;
+    }
+    
+    .step-container.active {
+        display: block;
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    .step-header {
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: var(--text-color);
+    }
+    
+    .step-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    
+    .step-metric {
+        padding: 8px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
+        color: var(--text-color);
+    }
+    
+    .step-queue {
+        margin-top: 10px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
+        color: var(--text-color);
+    }
+    
+    .animation-controls {
+        margin: 20px 0;
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+    
+    .animation-button {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    
+    .animation-button:hover {
+        opacity: 0.9;
+    }
+    
+    .animation-button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<script>
+    // Initialize animation steps from Django context
+    const animationStepsData = JSON.parse('{{ animation_steps|safe|escapejs }}');
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const processBlocks = document.querySelectorAll('.process-block');
+        processBlocks.forEach(block => {
+            const left = block.dataset.left;
+            const width = block.dataset.width;
+            if (left) {
+                block.style.left = `calc(${left}% - 1px)`;
+            }
+            block.style.width = `calc(${width}% + 1px)`;
+        });
+    });
+
+    // Animation state
+    let currentStep = 0;
+    let animationSteps = animationStepsData;
+    let animationInterval = null;
+    let isPlaying = false;
+
+    // DOM elements
+    const stepsContainer = document.getElementById('stepsContainer');
+    const prevButton = document.getElementById('prevStep');
+    const playPauseButton = document.getElementById('playPause');
+    const nextButton = document.getElementById('nextStep');
+    const resetButton = document.getElementById('resetAnimation');
+
+    // Initialize animation
+    function initializeAnimation() {
+        if (animationSteps && animationSteps.length > 0) {
+            renderStep(currentStep);
+            updateButtonStates();
+        } else {
+            stepsContainer.innerHTML = '<div class="step-container">No animation steps available</div>';
+            prevButton.disabled = true;
+            nextButton.disabled = true;
+            playPauseButton.disabled = true;
+        }
+    }
+
+    // Render a single step
+    function renderStep(stepIndex) {
+        const step = animationSteps[stepIndex];
+        if (!step) return;
+
+        const stepElement = document.createElement('div');
+        stepElement.className = 'step-container active';
+        
+        const metrics = step.metrics || {
+            avg_turnaround_time: 0,
+            avg_waiting_time: 0,
+            cpu_utilization: 0
+        };
+        
+        stepElement.innerHTML = 
+            '<div class="step-header">Time: ' + (step.time || 0) + '</div>' +
+            '<div class="step-details">' +
+                '<div class="step-metric">Current Process: ' + (step.current_process || 'None') + '</div>' +
+                '<div class="step-metric">Ready Queue: ' + (step.ready_queue ? step.ready_queue.join(', ') : 'Empty') + '</div>' +
+                '<div class="step-metric">Completed: ' + (step.completed ? step.completed.join(', ') : 'None') + '</div>' +
+            '</div>' +
+            '<div class="step-queue">' +
+                '<strong>Metrics:</strong><br>' +
+                'Average Turnaround Time: ' + metrics.avg_turnaround_time.toFixed(2) + '<br>' +
+                'Average Waiting Time: ' + metrics.avg_waiting_time.toFixed(2) + '<br>' +
+                'CPU Utilization: ' + metrics.cpu_utilization.toFixed(2) + '%' +
+            '</div>';
+
+        // Clear previous step and show new one
+        stepsContainer.innerHTML = '';
+        stepsContainer.appendChild(stepElement);
+    }
+
+    // Update button states
+    function updateButtonStates() {
+        prevButton.disabled = currentStep === 0;
+        nextButton.disabled = currentStep === animationSteps.length - 1;
+        playPauseButton.textContent = isPlaying ? 'Pause' : 'Play';
+    }
+
+    // Event listeners
+    prevButton.addEventListener('click', () => {
+        if (currentStep > 0) {
+            currentStep--;
+            renderStep(currentStep);
+            updateButtonStates();
+        }
+    });
+
+    nextButton.addEventListener('click', () => {
+        if (currentStep < animationSteps.length - 1) {
+            currentStep++;
+            renderStep(currentStep);
+            updateButtonStates();
+        }
+    });
+
+    playPauseButton.addEventListener('click', () => {
+        isPlaying = !isPlaying;
+        updateButtonStates();
+
+        if (isPlaying) {
+            animationInterval = setInterval(() => {
+                if (currentStep < animationSteps.length - 1) {
+                    currentStep++;
+                    renderStep(currentStep);
+                    updateButtonStates();
+                } else {
+                    clearInterval(animationInterval);
+                    isPlaying = false;
+                    updateButtonStates();
+                }
+            }, 1000); // 1 second per step
+        } else {
+            clearInterval(animationInterval);
+        }
+    });
+
+    resetButton.addEventListener('click', () => {
+        clearInterval(animationInterval);
+        currentStep = 0;
+        isPlaying = false;
+        renderStep(currentStep);
+        updateButtonStates();
+    });
+
+    // Initialize animation when page loads
+    initializeAnimation();
+</script>
+{% endblock %}

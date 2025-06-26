@@ -1,0 +1,276 @@
+{% extends 'taskmanager/base.html' %}
+
+{% block title %}Process Synchronization{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4">
+    <h1 class="text-3xl font-bold mb-6">Process Synchronization</h1>
+    
+    <!-- Mutex Section -->
+    <div class="bg-gray-800 rounded-lg p-6 mb-6">
+        <h2 class="text-2xl font-semibold mb-4">Mutex Locks</h2>
+        <!-- Add Process ID Display -->
+        <div id="currentProcessId" class="mb-4 p-4 bg-gray-700 rounded-lg hidden">
+            <h3 class="text-xl font-semibold mb-2">Current Process ID</h3>
+            <div class="flex items-center gap-4">
+                <p class="text-lg font-mono flex-1" id="processIdDisplay"></p>
+                <button id="copyProcessId" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                    Copy to Clipboard
+                </button>
+                <button id="saveProcessId" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+                    Save Process ID
+                </button>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Acquire Lock Form -->
+            <div class="bg-gray-700 rounded-lg p-4">
+                <h3 class="text-xl font-semibold mb-3">Acquire Lock</h3>
+                <form id="acquireLockForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Resource Name</label>
+                        <input type="text" name="resource_name" class="w-full px-3 py-2 bg-gray-600 rounded-lg" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Timeout (seconds)</label>
+                        <input type="number" name="timeout" value="30" class="w-full px-3 py-2 bg-gray-600 rounded-lg">
+                    </div>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                        Acquire Lock
+                    </button>
+                </form>
+            </div>
+
+            <!-- Release Lock Form -->
+            <div class="bg-gray-700 rounded-lg p-4">
+                <h3 class="text-xl font-semibold mb-3">Release Lock</h3>
+                <form id="releaseLockForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Resource Name</label>
+                        <input type="text" name="resource_name" class="w-full px-3 py-2 bg-gray-600 rounded-lg" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Process ID</label>
+                        <input type="text" name="process_id" class="w-full px-3 py-2 bg-gray-600 rounded-lg" required>
+                    </div>
+                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg">
+                        Release Lock
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Queue Section -->
+    <div class="bg-gray-800 rounded-lg p-6">
+        <h2 class="text-2xl font-semibold mb-4">Process Queues</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Create Queue Form -->
+            <div class="bg-gray-700 rounded-lg p-4">
+                <h3 class="text-xl font-semibold mb-3">Create Queue</h3>
+                <form id="createQueueForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Queue Name</label>
+                        <input type="text" name="queue_name" class="w-full px-3 py-2 bg-gray-600 rounded-lg" required>
+                    </div>
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+                        Create Queue
+                    </button>
+                </form>
+            </div>
+
+            <!-- Add to Queue Form -->
+            <div class="bg-gray-700 rounded-lg p-4">
+                <h3 class="text-xl font-semibold mb-3">Add to Queue</h3>
+                <form id="addToQueueForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Queue Name</label>
+                        <input type="text" name="queue_name" class="w-full px-3 py-2 bg-gray-600 rounded-lg" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Priority</label>
+                        <input type="number" name="priority" value="0" class="w-full px-3 py-2 bg-gray-600 rounded-lg">
+                    </div>
+                    <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg">
+                        Add to Queue
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Queue Status Section -->
+        <div class="mt-6">
+            <h3 class="text-xl font-semibold mb-3">Queue Status</h3>
+            <form id="queueStatusForm" class="mb-4">
+                <div class="flex gap-4">
+                    <input type="text" name="queue_name" placeholder="Enter queue name" class="flex-1 px-3 py-2 bg-gray-600 rounded-lg">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                        Check Status
+                    </button>
+                </div>
+            </form>
+            <div id="queueStatus" class="bg-gray-700 rounded-lg p-4">
+                <!-- Queue status will be displayed here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Acquire Lock Form
+    document.getElementById('acquireLockForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        try {
+            const response = await fetch('/process-sync/mutex/acquire/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+            const data = await response.json();
+            if (data.success) {
+                // Display process ID in the dedicated area
+                document.getElementById('currentProcessId').classList.remove('hidden');
+                document.getElementById('processIdDisplay').textContent = data.process_id;
+                alert(`Lock acquired successfully!\nProcess ID: ${data.process_id}\nPlease save this Process ID for releasing the lock later.`);
+            } else {
+                alert(data.message);
+            }
+        } catch (error) {
+            alert('Error acquiring lock');
+        }
+    });
+
+    // Release Lock Form
+    document.getElementById('releaseLockForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        try {
+            const response = await fetch('/process-sync/mutex/release/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+            const data = await response.json();
+            alert(data.success ? 'Lock released successfully!' : data.message);
+        } catch (error) {
+            alert('Error releasing lock');
+        }
+    });
+
+    // Create Queue Form
+    document.getElementById('createQueueForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        try {
+            const response = await fetch('/process-sync/queue/create/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+            const data = await response.json();
+            alert(data.success ? 'Queue created successfully!' : data.message);
+        } catch (error) {
+            alert('Error creating queue');
+        }
+    });
+
+    // Add to Queue Form
+    document.getElementById('addToQueueForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        try {
+            const response = await fetch('/process-sync/queue/add/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+            const data = await response.json();
+            alert(data.success ? 'Added to queue successfully!' : data.message);
+        } catch (error) {
+            alert('Error adding to queue');
+        }
+    });
+
+    // Queue Status Form
+    document.getElementById('queueStatusForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        try {
+            const response = await fetch(`/process-sync/queue/status/?queue_name=${formData.get('queue_name')}`);
+            const data = await response.json();
+            if (data.success) {
+                const statusHtml = data.items.map(item => `
+                    <div class="mb-2 p-2 bg-gray-600 rounded">
+                        <p>Process ID: ${item.process_id}</p>
+                        <p>Priority: ${item.priority}</p>
+                        <p>Status: ${item.status}</p>
+                        <p>Created: ${new Date(item.created_at).toLocaleString()}</p>
+                    </div>
+                `).join('');
+                document.getElementById('queueStatus').innerHTML = statusHtml;
+            } else {
+                alert(data.message);
+            }
+        } catch (error) {
+            alert('Error fetching queue status');
+        }
+    });
+
+    // Copy Process ID to Clipboard
+    document.getElementById('copyProcessId').addEventListener('click', function() {
+        const processId = document.getElementById('processIdDisplay').textContent;
+        navigator.clipboard.writeText(processId).then(() => {
+            alert('Process ID copied to clipboard!');
+        }).catch(err => {
+            alert('Failed to copy Process ID');
+        });
+    });
+
+    // Save Process ID
+    document.getElementById('saveProcessId').addEventListener('click', function() {
+        const processId = document.getElementById('processIdDisplay').textContent;
+        const resourceName = document.querySelector('input[name="resource_name"]').value;
+        const timestamp = new Date().toLocaleString();
+        
+        // Create a text blob
+        const blob = new Blob([`Process ID: ${processId}\nResource: ${resourceName}\nTimestamp: ${timestamp}`], 
+            { type: 'text/plain' });
+        
+        // Create download link
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `process_id_${processId.substring(0, 8)}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+    });
+});
+
+// Helper function to get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %} 
